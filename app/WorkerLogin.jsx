@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ImageBackground } from 'react-native';
 import background from '@/assets/images/log-bg.jpg';
+import { useRouter } from 'expo-router';
+import { useAuth } from './context/AuthContext';
 
 const WorkerLogin = () => {
   const apiUrl = 'https://magicminute.online/api';
-
+  const router = useRouter();
+  const { login } = useAuth();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [midOrPassword, setMidOrPassword] = useState('');
 
@@ -15,21 +18,23 @@ const WorkerLogin = () => {
     }
 
     try {
-      var logdata={
-        "phone": phoneNumber,
-        "mpin": midOrPassword
-      }
-      const response = await fetch(apiUrl+'/v1/auth/staff/token', {
+      const logdata = {
+        phone: phoneNumber,
+        mpin: midOrPassword,
+      };
+
+      const response = await fetch(apiUrl + '/v1/auth/staff/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(logdata),
       });
-      
+
       const data = await response.json();
       if (response.ok) {
-        Alert.alert('Success', 'Login successful!');
+        await login('worker');
+        router.replace('/WorkerHome');
       } else {
         Alert.alert('Error', data.message || 'Login failed');
       }

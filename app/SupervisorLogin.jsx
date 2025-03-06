@@ -1,37 +1,41 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ImageBackground } from 'react-native';
 import background from '@/assets/images/log-bg.jpg';
+import { useRouter } from 'expo-router';
+import { useAuth } from './context/AuthContext';
 
 const SupervisorLogin = () => {
   const apiUrl = 'https://magicminute.online/api';
+  const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [midOrPassword, setMidOrPassword] = useState('');
 
   const handleLogin = async () => {
     if (!email || !midOrPassword) {
-      Alert.alert('Error', 'Please enter both Email and MID/Password');
+      Alert.alert('Error', 'Please enter both Email and Password');
       return;
     }
 
     try {
-      var logdata={
-        'email':email,
-        'password':midOrPassword
-      }
-      const response = await fetch(apiUrl+'/v1/auth/officer/token', {
+      const logdata = {
+        email: email,
+        password: midOrPassword,
+      };
+
+      const response = await fetch(apiUrl + '/v1/auth/officer/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-
         },
-        body : JSON.stringify(logdata),
+        body: JSON.stringify(logdata),
       });
 
       const data = await response.json();
       if (response.ok) {
-        Alert.alert('Success', 'Login successful!');
+        await login('supervisor'); 
+        router.replace('/SupervisorHome'); 
       } else {
-  
         Alert.alert('Error', data.message || 'Login failed');
       }
     } catch (error) {

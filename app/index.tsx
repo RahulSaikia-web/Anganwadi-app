@@ -1,29 +1,38 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-} from "react-native";
-import React from "react";
-import background from "@/assets/images/bg-img.jpg";
-import { Link } from "expo-router";
+import { View, Text, StyleSheet, ImageBackground } from 'react-native';
+import { useAuth } from './context/AuthContext';
+import React, { useEffect } from 'react';
+import background from '@/assets/images/bg-img.jpg';
+import { Link, useRouter } from 'expo-router';
 
 const Index = () => {
+  const { userRole } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (userRole === 'supervisor') {
+      router.replace('/SupervisorHome');
+    } else if (userRole === 'worker') {
+      router.replace('/WorkerHome');
+    }
+  }, [userRole]);
+
   return (
     <View style={styles.container}>
       <ImageBackground source={background} style={styles.image} blurRadius={5}>
         <View style={styles.contentContainer}>
-          {/* Supervisor Login Box */}
-          <Link href="/SupervisorLogin" style={styles.loginBox}>
-            <View style={styles.innerBox}>
-              <Text style={styles.loginText}>Login As Supervisor</Text>
+          <Link href="/SupervisorLogin">
+            <View style={styles.loginBox}>
+              <View style={styles.innerBox}>
+                <Text style={styles.loginText}>Login As Supervisor</Text>
+              </View>
             </View>
           </Link>
 
-          {/* Worker Login Box */}
-          <Link href="/WorkerLogin" style={styles.loginBox2}>
-            <View style={styles.innerBox}>
-              <Text style={styles.loginText}>Login As Worker</Text>
+          <Link href="/WorkerLogin">
+            <View style={styles.loginBox2}>
+              <View style={styles.innerBox}>
+                <Text style={styles.loginText}>Login As Worker</Text>
+              </View>
             </View>
           </Link>
         </View>
@@ -31,8 +40,6 @@ const Index = () => {
     </View>
   );
 };
-
-export default Index;
 
 const styles = StyleSheet.create({
   container: {
@@ -54,7 +61,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(90, 19, 255, 0.94)", // Transparent background
+    backgroundColor: "rgba(90, 19, 255, 0.94)", 
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -67,7 +74,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(19, 94, 255, 0.94)", // Transparent background
+    backgroundColor: "rgba(19, 94, 255, 0.94)", 
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -79,7 +86,7 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)", // Inner small transparency
+    backgroundColor: "rgba(255, 255, 255, 0.2)", 
     borderRadius: 10,
   },
   loginText: {
@@ -90,3 +97,5 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
 });
+
+export default Index;
