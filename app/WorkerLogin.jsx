@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from './context/AuthContext';
 
 const WorkerLogin = () => {
+  let JWT_token;
   const apiUrl = 'https://magicminute.online/api';
   const router = useRouter();
   const { login } = useAuth();
@@ -34,7 +35,11 @@ const WorkerLogin = () => {
       const data = await response.json();
       if (response.ok) {
         await login('worker');
-        router.replace('/WorkerHome');
+        JWT_token= data.access_token;
+                       
+        router.replace('/WorkerHome',{
+          token:JWT_token,
+        });
       } else {
         Alert.alert('Error', data.message || 'Login failed');
       }

@@ -4,6 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'react-native-image-picker';
 
 const AddStudent = () => {
+  const apiUrl = 'https://magicminute.online/api';
   const [form, setForm] = useState({
     studentName: '',
     dob: '',
@@ -69,16 +70,16 @@ const AddStudent = () => {
     }
 
     const formData = new FormData();
-    formData.append('studentName', form.studentName);
-    formData.append('dob', form.dob);
-    formData.append('gender', form.gender);
-    formData.append('motherName', form.motherName);
-    formData.append('fatherName', form.fatherName);
-    formData.append('phoneNumber', form.phoneNumber);
-    formData.append('centerId', form.centerId);
+    formData.append('student_name', form.studentName);
+    formData.append('student_dob', form.dob);
+    formData.append('student_gender', form.gender);
+    formData.append('student_mother_name', form.motherName);
+    formData.append('student_father_name', form.fatherName);
+    formData.append('student_phone', form.phoneNumber);
+    formData.append('student_center_id', form.centerId);
     
     if (form.photo) {
-      formData.append('photo', {
+      formData.append('student_image', {
         uri: form.photo.uri,
         type: form.photo.type,
         name: form.photo.fileName,
@@ -86,9 +87,11 @@ const AddStudent = () => {
     }
 
     try {
-      const response = await fetch('YOUR_API_ENDPOINT', {
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", "Bearer "+access_token )
+      const response = await fetch(apiUrl+'/v1/students', {
         method: 'POST',
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: myHeaders,
         body: formData,
       });
       
