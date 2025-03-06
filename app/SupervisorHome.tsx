@@ -35,6 +35,8 @@ const SupervisorHome = () => {
           <OptionButton icon="user-edit" text="Update Worker" onPress={() => navigation.navigate('UpdateWorker')} />
           <OptionButton icon="clipboard-list" text="Worker Attendance" onPress={() => navigation.navigate('WorkerAttendance')} />
           <OptionButton icon="user-check" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
+          <OptionButton icon="users" text="Workers List" onPress={() => navigation.navigate('WorkerList')} />
+          <OptionButton icon="users" text="Student List" onPress={() => navigation.navigate('StudentList')} />
         </View>
       </View>
     </ImageBackground>

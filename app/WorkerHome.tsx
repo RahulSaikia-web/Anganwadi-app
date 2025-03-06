@@ -24,15 +24,16 @@ const WorkerHome = () => {
           </View>
           <Button title="Logout" onPress={handleLogout} color="black" />
         </View>
-
+   
         {/* Options Section */}
         <View style={styles.optionsWrapper}>
           <View style={styles.optionsContainer}>
             <OptionButton icon="user-plus" text="Add Student" onPress={() => navigation.navigate('AddStudent')} />
             <OptionButton icon="user-check" text="Self Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
-            <OptionButton icon="users" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
-            <OptionButton icon="home" text="Home Visit" onPress={() => navigation.navigate('HomeVisit')} />
-            <OptionButton icon="hand-holding-heart" text="Beneficiaries" onPress={() => navigation.navigate('Beneficiaries')} />
+            <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
+            {/* <OptionButton icon="home" text="Home Visit" onPress={() => navigation.navigate('HomeVisit')} /> */}
+            {/* <OptionButton icon="hand-holding-heart" text="Beneficiaries" onPress={() => navigation.navigate('Beneficiaries')} /> */}
+            <OptionButton icon="users" text="All Student" onPress={()=>navigation.navigate('AllStudent')}/>
             <OptionButton icon="ellipsis-h" text="More" onPress={() => navigation.navigate('More')} />
           </View>
         </View>

@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, ImageBackground } from 'react-native';
 import { useAuth } from './context/AuthContext';
 import React, { useEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import background from '@/assets/images/bg-img.jpg';
 import { Link, useRouter } from 'expo-router';
 
@@ -23,6 +24,7 @@ const Index = () => {
           <Link href="/SupervisorLogin">
             <View style={styles.loginBox}>
               <View style={styles.innerBox}>
+                <Ionicons name="person" size={40} color="white" />
                 <Text style={styles.loginText}>Login As Supervisor</Text>
               </View>
             </View>
@@ -31,6 +33,7 @@ const Index = () => {
           <Link href="/WorkerLogin">
             <View style={styles.loginBox2}>
               <View style={styles.innerBox}>
+                <Ionicons name="people" size={40} color="white" />
                 <Text style={styles.loginText}>Login As Worker</Text>
               </View>
             </View>
@@ -95,6 +98,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     textTransform: "uppercase",
+    marginTop: 10, // Add spacing between icon and text
   },
 });
 
