@@ -8,7 +8,7 @@ import axios from 'axios';
 const FormData = global.FormData;
   
 const AddStudent = () => {
-  const [imageBlob, setImageBlob] = useState();
+  const [image, setImage] = useState();
   const apiUrl = 'https://magicminute.online/api';
   const [form, setForm] = useState({
     studentName: '',
@@ -62,16 +62,28 @@ const AddStudent = () => {
     });
   };
 
-  const uploadImage = async () => {
+  const captureImage = async () => {
     try{
       await ImagePicker.requestCameraPermissionsAsync();
       let result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
+        allowsEditing: false,
         aspect: [1, 1],
         quality: 1,
-      })
-    } catch (error){
+      });
 
+      if (!result.canceled) {
+        await saveImage(result.assets[0].uri);
+      }
+    } catch (error){
+      alert("Error capturing image: " + error.message);
+    }
+  }
+
+  const saveImage = async (image) => {
+    try {
+      setImage(image);
+    } catch (error){
+      throw error;
     }
   }
 
@@ -239,7 +251,7 @@ const AddStudent = () => {
       <View style={styles.buttonContainer}>
         <Button title="Pick Photo" onPress={handleImagePick} />
         <View style={styles.buttonSpacing} />
-        <Button title="Take Photo" onPress={handleCameraCapture} />
+        <Button title="Take Photo" onPress={() => { captureImage()}} />
       </View>
       {form.photo && <Image source={{ uri: form.photo.uri }} style={styles.image} />}
       
