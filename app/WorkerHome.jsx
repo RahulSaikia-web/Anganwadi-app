@@ -1,259 +1,133 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Image, Modal, BackHandler, Animated, Easing } from 'react-native';
-import { useAuth } from './context/AuthContext';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const WorkerHome = () => {
-  const { logout, user } = useAuth(); 
   const navigation = useNavigation();
-  const [modalVisible, setModalVisible] = useState(false);
-  const bounceAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true);
-    return () => backHandler.remove();
-  }, []);
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(bounceAnim, {
-          toValue: -10,  
-          duration: 1050,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(bounceAnim, {
-          toValue: 0,  
-          duration: 800,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
-  const handleLogout = async () => {
-    await logout();
-    navigation.replace('index'); 
-  };
 
   return (
-    <ImageBackground source={require('@/assets/images/bg-ds.jpg')} style={styles.background} blurRadius={10}>
-      <View style={styles.container}>
-        <View style={styles.userInfoContainer}>
-          <TouchableOpacity style={styles.profileSection} onPress={() => setModalVisible(true)}>
-            <Image source={require('@/assets/images/profile.webp')} style={styles.profileIcon} />
-            <View>
-              <Text style={styles.userName}>{user?.name || 'User Name'}</Text>
-              <Text style={styles.phoneNumber}>{user?.phone || 'Phone Number'}</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <LinearGradient colors={['#ff6161', '#d32f2f']} style={styles.logoutGradient}>
-              <FontAwesome5 name="sign-out-alt" size={18} color="white" style={styles.logoutIcon} />
-              <Text style={styles.logoutText}>Logout</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-        <Animated.Image
-          source={require('@/assets/images/app-icon.jpg')}
-          style={[styles.logoImage, { transform: [{ translateY: bounceAnim }] }]}
-        />
-
-        <View style={styles.optionsWrapper}>
-          <View style={styles.optionsContainer}>
-            <OptionButton icon="user-plus" text="Add Student" onPress={() => navigation.navigate('AddStudent')} />
-            <OptionButton icon="users-cog" text="All Helpers" onPress={() => navigation.navigate('AllHelpers')} />
-            <OptionButton icon="user-plus" text="Add Helper" onPress={() => navigation.navigate('AddHelper')} />
-            <OptionButton icon="user-check" text="Self Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
-            <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
-            <OptionButton icon="users" text="All Student" onPress={() => navigation.navigate('AllStudent')} />
-            <OptionButton icon="clipboard-list" text="Attendance" onPress={() => navigation.navigate('Attendance')} />
-            <OptionButton icon="school" text="Center Details" onPress={() => navigation.navigate('CenterDetails')} />
-            <OptionButton icon="shopping-bag" text="Ration" onPress={() => navigation.navigate('Ration')} />
-            <OptionButton icon="home" text="Home Visit" onPress={() => navigation.navigate('HomeVisit')} />
-            <OptionButton icon="cogs" text="Settings" onPress={() => navigation.navigate('Settings')} />
-          </View>
+    <ScrollView style={styles.container}>
+      {/* Profile Section */}
+      <View style={styles.profileSection}>
+        <Image source={require('@/assets/images/profile.webp')} style={styles.profileImage} />
+        <View>
+          <Text style={styles.userName}>Dipalee Das</Text>
+          <Text style={styles.userLocation}>Era Dighalpan Das Gaon (18292051008)</Text>
         </View>
       </View>
-      <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>User Details</Text>
-            
-            <View style={styles.modalRow}>
-              <FontAwesome5 name="user" size={20} color="#333" />
-              <Text style={styles.modalText}>Name : {user?.name || 'Not Available'}</Text>
-            </View>
 
-            <View style={styles.modalRow}>
-              <FontAwesome5 name="phone" size={20} color="#333" />
-              <Text style={styles.modalText}>Phone : {user?.phone || 'Not Available'}</Text>
-            </View>
+      {/* Quick Actions */}
+      <View style={styles.quickActions}>
+        <TouchableOpacity style={styles.quickActionCard}>
+          <FontAwesome5 name="users" size={24} color="white" />
+          <Text style={styles.quickActionText}>Beneficiaries</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.quickActionCard}>
+          <FontAwesome5 name="calendar-check" size={24} color="white" />
+          <Text style={styles.quickActionText}>Daily Tracking</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.quickActionCard}>
+          <FontAwesome5 name="home" size={24} color="white" />
+          <Text style={styles.quickActionText}>Home Visits</Text>
+        </TouchableOpacity>
+      </View>
 
-            <View style={styles.modalRow}>
-              <FontAwesome5 name="user-tag" size={20} color="#333" />
-              <Text style={styles.modalText}>Role : {user?.role || 'Not Available'}</Text>
-            </View>
-
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    </ImageBackground>
+      {/* Action Center */}
+      <Text style={styles.actionCenterTitle}>Action Center</Text>
+      <View style={styles.actionGrid}>
+        <OptionButton icon="user-plus" text="Add Student" onPress={() => navigation.navigate('AddStudent')} />
+        <OptionButton icon="users" text="All Helpers" onPress={() => navigation.navigate('AllHelpers')} />
+        <OptionButton icon="user-plus" text="Add Helper" onPress={() => navigation.navigate('AddHelper')} />
+        <OptionButton icon="user-check" text="Self Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
+        <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
+        <OptionButton icon="users" text="All Student" onPress={() => navigation.navigate('AllStudent')} />
+        <OptionButton icon="clipboard-list" text="Attendance" onPress={() => navigation.navigate('Attendance')} />
+        <OptionButton icon="school" text="Center Details" onPress={() => navigation.navigate('CenterDetails')} />
+        <OptionButton icon="shopping-bag" text="Ration" onPress={() => navigation.navigate('Ration')} />
+        <OptionButton icon="home" text="Home Visit" onPress={() => navigation.navigate('HomeVisit')} />
+        <OptionButton icon="cogs" text="Settings" onPress={() => navigation.navigate('Settings')} />
+      </View>
+    </ScrollView>
   );
 };
 
+// OptionButton component to handle navigation
 const OptionButton = ({ icon, text, onPress }) => (
   <TouchableOpacity style={styles.optionButton} onPress={onPress}>
-    <FontAwesome5 name={icon} size={30} color="#d32f2f" />
+    <FontAwesome5 name={icon} size={24} color="#d32f2f" />
     <Text style={styles.optionText}>{text}</Text>
   </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
-  },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', 
-  },
-  userInfoContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'rgba(183, 28, 28, 0.9)',
-    padding: 20,
+    backgroundColor: '#f8f8f8',
   },
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#d32f2f',
   },
-  profileIcon: {
+  profileImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 10,
+    marginRight: 15,
   },
   userName: {
     fontSize: 18,
     color: 'white',
     fontWeight: 'bold',
   },
-  phoneNumber: {
-    fontSize: 16,
+  userLocation: {
+    fontSize: 14,
     color: 'white',
   },
-  logoutButton: {
-    borderRadius: 25,
-    overflow: 'hidden',
-  },
-  logoutGradient: {
+  quickActions: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 20,
+  },
+  quickActionCard: {
+    backgroundColor: '#d32f2f',
+    padding: 20,
+    borderRadius: 10,
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 25,
+    width: 100,
   },
-  logoutIcon: {
-    marginRight: 8,
-  },
-  logoutText: {
-    fontSize: 16,
+  quickActionText: {
     color: 'white',
+    marginTop: 10,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  actionCenterTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 20,
   },
-  optionsWrapper: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  optionsContainer: {
+  actionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 15,
-    padding: 20,
   },
   optionButton: {
-    width: 100,
-    height: 100,
-    justifyContent: 'center',
+    backgroundColor: 'white',
+    padding: 15,
+    margin: 10,
+    borderRadius: 10,
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
-    borderRadius: 15,
-    elevation: 2,
+    width: 100,
+    elevation: 3,
   },
   optionText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#8B0000',
-    marginTop: 8,
+    fontSize: 12,
+    marginTop: 5,
     textAlign: 'center',
-  },
-  logoImage: {
-    marginTop: 20,
-    height: 200,
-    width: "80%",
-    marginLeft: "10%",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '85%',
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 15,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#d32f2f',
-    marginBottom: 15,
-  },
-  modalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 8,
-    width: '100%',
-    paddingHorizontal: 10,
-  },
-  modalText: {
-    fontSize: 16,
-    color: '#333',
-    marginLeft: 10,
-    flexShrink: 1,
-  },
-  closeButton: {
-    marginTop: 15,
-    backgroundColor: '#d32f2f',
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    borderRadius: 10,
-  },
-  closeButtonText: {
-    fontSize: 16,
-    color: 'white',
-    fontWeight: 'bold',
   },
 });
 
