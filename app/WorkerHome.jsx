@@ -53,7 +53,6 @@ const WorkerHome = () => {
             </View>
           </TouchableOpacity>
 
-          {/* Stylish Logout Button */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <LinearGradient colors={['#ff6161', '#d32f2f']} style={styles.logoutGradient}>
               <FontAwesome5 name="sign-out-alt" size={18} color="white" style={styles.logoutIcon} />
@@ -61,8 +60,6 @@ const WorkerHome = () => {
             </LinearGradient>
           </TouchableOpacity>
         </View>
-
-        {/* 🔥 Animated Bouncing App Icon */}
         <Animated.Image
           source={require('@/assets/images/app-icon.jpg')}
           style={[styles.logoImage, { transform: [{ translateY: bounceAnim }] }]}
@@ -206,6 +203,55 @@ const styles = StyleSheet.create({
     height: 200,
     width: "80%",
     marginLeft: "10%",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 15,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#d32f2f',
+    marginBottom: 15,
+  },
+  modalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 8,
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 10,
+    flexShrink: 1,
+  },
+  closeButton: {
+    marginTop: 15,
+    backgroundColor: '#d32f2f',
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+  },
+  closeButtonText: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 
