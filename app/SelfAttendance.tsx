@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ImageBackground } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,7 +40,7 @@ const SelfAttendance = () => {
     });
 
     try {
-      const response = await fetch('api de', {
+      const response = await fetch('API_ENDPOINT_HERE', {
         method: 'POST',
         body: formData,
         headers: {
@@ -55,51 +55,55 @@ const SelfAttendance = () => {
   };
 
   return (
-    <ImageBackground source={require('@/assets/images/bg-ds.jpg')} style={styles.backgroundImage} blurRadius={10}>
-      <SafeAreaView style={styles.safeContainer}>
-        <View style={styles.navBar}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="white" />
-            <Text style={styles.backText}>Back</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.container}>
-          <Text style={styles.title}>Self Attendance</Text>
-          <View style={styles.imageContainer}>
-            {image ? (
-              <Image source={{ uri: image }} style={styles.image} />
-            ) : (
-              <Text style={styles.placeholderText}>Click Capture Attendance Button</Text>
-            )}
-          </View>
-          <TouchableOpacity style={styles.captureButton} onPress={takePhoto}>
-            <Text style={styles.buttonText}>📸 Capture Attendance</Text>
-          </TouchableOpacity>
-          {image && (
-            <TouchableOpacity style={styles.submitButton} onPress={submitAttendance}>
-              <Text style={styles.buttonText}>✅ Submit</Text>
-            </TouchableOpacity>
+    <SafeAreaView style={styles.safeContainer}>
+      {/* Navbar */}
+      <View style={styles.navBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Instructions Section - Moved to the Top */}
+      <View style={styles.instructionsContainer}>
+
+        <Text style={styles.instructionsTitle}>How It Works:</Text>
+        <Text style={styles.instruction}>• Tap "📸 Capture Attendance" to take a photo.</Text>
+        <Text style={styles.instruction}>• Ensure your face is clearly visible in the photo.</Text>
+        <Text style={styles.instruction}>• Tap "Submit" to mark your attendance.</Text>
+        <Text style={styles.instruction}>• Wait for a confirmation message.</Text>
+      </View>
+
+      {/* Main Content */}
+      <View style={styles.container}>
+
+        {/* Image Preview */}
+        <View style={styles.imageContainer}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.image} />
+          ) : (
+            <Text style={styles.placeholderText}>Capture an Attendance Photo</Text>
           )}
         </View>
-      </SafeAreaView>
-    </ImageBackground>
+
+        <TouchableOpacity style={styles.captureButton} onPress={takePhoto}>
+          <Text style={styles.buttonText}>📸 Capture Attendance</Text>
+        </TouchableOpacity>
+
+        {image && (
+          <TouchableOpacity style={styles.submitButton} onPress={submitAttendance}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
   safeContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+    backgroundColor: '#ffffff',
   },
   navBar: {
     width: '100%',
@@ -119,14 +123,62 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 5,
   },
-  title: {
-    fontSize: 26,
+  instructionsContainer: {
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#f8f9fa',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  instructionsTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: 'white',
+    marginBottom: 5,
+    color: '#444',
+    textAlign: 'center',
+  },
+  instruction: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 3,
+    textAlign: 'center',
+  },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
+  },
+  imageContainer: {
+    width: 220,
+    height: 220,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    backgroundColor: '#f8f9fa',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,
+    borderRadius: 10,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  placeholderText: {
+    color: '#555',
+    textAlign: 'center',
+    paddingHorizontal: 10,
   },
   captureButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: 'blue', 
     padding: 15,
     borderRadius: 10,
     marginTop: 10,
@@ -139,7 +191,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   submitButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#28a745', 
     padding: 15,
     borderRadius: 10,
     marginTop: 10,
@@ -155,27 +207,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  imageContainer: {
-    width: 220,
-    height: 220,
-    borderWidth: 2,
-    borderColor: '#ced4da',
-    backgroundColor: '#e9ecef',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 10,
-    borderRadius: 10,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 10,
-  },
-  placeholderText: {
-    color: '#000000',
-    textAlign: 'center',
-    paddingHorizontal: 10,
   },
 });
 

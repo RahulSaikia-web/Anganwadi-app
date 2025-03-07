@@ -1,8 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, ImageBackground, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { FontAwesome5, Ionicons } from '@expo/vector-icons';
-
+import { Ionicons } from '@expo/vector-icons';
 
 const AllStudent = () => {
   const navigation = useNavigation();
@@ -33,46 +32,40 @@ const AllStudent = () => {
   }, []);
 
   return (
-    <ImageBackground source={require('@/assets/images/bg-ds.jpg')} style={styles.background} blurRadius={10}>
-      <View style={styles.container}>
-        {/* Navbar */}
-        <View style={styles.navBar}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                  <Ionicons name="arrow-back" size={24} color="white" />
-                  <Text style={styles.backText}>Back</Text>
-                </TouchableOpacity>
-              </View>
-
-        {/* Student List with Refresh Control */}
-        <FlatList
-          data={students}
-          keyExtractor={(item) => item.id}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          renderItem={({ item, index }) => (
-            <View style={styles.studentCard}>
-              <Text style={styles.serialNumber}>{index + 1}.</Text>
-              <View>
-                <Text style={styles.studentName}>{item.name}</Text>
-                <Text style={styles.details}>📞 {item.phone}</Text>
-                <Text style={styles.details}>👩‍👦 Mother: {item.mother}</Text>
-                <Text style={styles.details}>👨‍👦 Father: {item.father}</Text>
-              </View>
-            </View>
-          )}
-        />
+    <View style={styles.container}>
+      {/* Navbar */}
+      <View style={styles.navBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
       </View>
-    </ImageBackground>
+
+      {/* Student List with Refresh Control */}
+      <FlatList
+        data={students}
+        keyExtractor={(item) => item.id}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        renderItem={({ item, index }) => (
+          <View style={styles.studentCard}>
+            <Text style={styles.serialNumber}>{index + 1}.</Text>
+            <View>
+              <Text style={styles.studentName}>{item.name}</Text>
+              <Text style={styles.details}>📞 {item.phone}</Text>
+              <Text style={styles.details}>👩‍👦 Mother: {item.mother}</Text>
+              <Text style={styles.details}>👨‍👦 Father: {item.father}</Text>
+            </View>
+          </View>
+        )}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#f5f5f5',
   },
   navBar: {
     width: '100%',
