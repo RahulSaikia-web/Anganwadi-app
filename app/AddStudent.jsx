@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet, Image, PermissionsAndroid, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import * as ImagePicker from 'react-native-image-picker';
+// import * as ImagePicker from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
 
+const FormData = global.FormData;
+  
 const AddStudent = () => {
+  const [imageBlob, setImageBlob] = useState();
   const apiUrl = 'https://magicminute.online/api';
   const [form, setForm] = useState({
     studentName: '',
@@ -42,19 +47,77 @@ const AddStudent = () => {
     return true;
   };
 
-  const handleImagePick = () => {
-    ImagePicker.launchImageLibrary({ mediaType: 'photo', selectionLimit: 1 }, (response) => {
+  const handleImagePick = async () => {
+    ImagePicker.launchImageLibrary({ mediaType: 'photo', selectionLimit: 1 }, async(response) => {
       if (!response.didCancel && !response.error && response.assets.length > 0) {
         setForm({ ...form, photo: response.assets[0] });
+
+        console.log(response.assets)
+        // const base64Response = await fetch(result.assets[0].uri);
+        // console.log(base64Response.bodyBlob)
+        // const blob = await base64Response.blob();
+        // console.log(blob)
+        // await saveBlob(blob)
       }
     });
   };
+
+  const uploadImage = async () => {
+    try{
+      await ImagePicker.requestCameraPermissionsAsync();
+      let result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      })
+    } catch (error){
+
+    }
+  }
+
+  const ahandleImagePick = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      setForm({ ...form, photo: result.assets[0]});
+      if (Platform.OS === 'android') {
+        console.log("android")
+        // const base64Response = await fetch(result.assets[0].uri);
+        // const blob = await base64Response.blob();
+        // console.log(blob)
+        // await saveBlob(blob);
+      }
+      else{
+        console.log("not android")
+        // const base64Response = await fetch(`data:${result.assets[0].mimeType};base64,${result.assets[0].base64}`);
+        // const blob = await base64Response.blob();
+        // console.log(blob)
+        // await saveBlob(blob);
+      }
+      const base64Response = await fetch(result.assets[0].uri);
+      console.log(base64Response.bodyBlob)
+      const blob = await base64Response.blob();
+      console.log(blob)
+      await saveBlob(blob);
+    }
+  };
+
+  async function saveBlob(blob) {
+    setImageBlob(blob);
+  }
 
   const handleCameraCapture = async () => {
     const hasPermission = await requestCameraPermission();
     if (!hasPermission) {
       Alert.alert('Permission Denied', 'Camera permission is required to take a photo');
-      return;
+      // return;
     }
     ImagePicker.launchCamera({ mediaType: 'photo', cameraType: 'back' }, (response) => {
       if (!response.didCancel && !response.error && response.assets.length > 0) {
@@ -66,7 +129,7 @@ const AddStudent = () => {
   const handleSubmit = async () => {
     if (Object.values(form).some((value) => !value)) {
       Alert.alert('Error', 'All fields are required');
-      return;
+      // return;
     }
 
     const formData = new FormData();
@@ -77,31 +140,70 @@ const AddStudent = () => {
     formData.append('student_father_name', form.fatherName);
     formData.append('student_phone', form.phoneNumber);
     formData.append('student_center_id', form.centerId);
-    
-    if (form.photo) {
-      formData.append('student_image', {
-        uri: form.photo.uri,
-        type: form.photo.type,
-        name: form.photo.fileName,
+
+    console.log(imageBlob)
+    if (imageBlob) {
+      formData.append('student_image_file', {
+        uri: imageBlob,
+        type: form.photo.mimeType,
+        name: form.photo.fileName
       });
     }
 
     try {
-      const myHeaders = new Headers();
-      myHeaders.append("Authorization", "Bearer "+access_token )
-      const response = await fetch(apiUrl+'/v1/students', {
-        method: 'POST',
-        headers: myHeaders,
-        body: formData,
+      // const headers = new Headers();
+      // headers.append('Authorization', 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwianRpIjoiYWI5OTQ5YmUtZGU5MC00NDc0LWEwM2MtODVmYWQ5ZjIxZjRjIiwidHlwZSI6ImFjY2VzcyIsImZyZXNoIjpmYWxzZSwiY3NyZiI6IiIsImlhdCI6MTc0MTM0Mjc3MiwiZXhwIjoxNzQxMzc4NzcyLjM4NzQ5NSwidXNlcl90eXBlIjoic3RhZmYiLCJ1c2VyX2lkIjoyLCJ1c2VyX3JvbGUiOiJXb3JrZXIifQ.JFqgS0V2QKU-D8rxwYM-heZevpwXyP6rQSrHrbgeO2cdJkgvRimMftH6jYKEwKTv2dXdWvGgswga8PS2R5dcnGDhBaG5hge3gOSiY3YQZHUopfnT6VmUe_xT8-r2OQZgd2Q-BAEaSUXZfFCyKsxi2GyBWn22uIChrAnZIUqoV3SkDHTXafX2LLGkunx1INAAcRb_dC1DAc4-v8Dz-8JfisASG-8-2Bg6V7LE80wNWi6Aa2xoBoo_1CC9vEUGWuRQ5SoNUg6FMSAiQq1kR0dAsAh5F7C3tjnjWbWjc6GlA-ntp2bd7cVCuXOw6XoqkCBFK391CiVsvTalcrupAIpLhQ')
+      // headers.append('Content-Type', 'multipart/form-data');
+
+      // const response = await fetch("https://magicminute.online/api/v1/students", {
+      //   method: 'POST',
+      //   headers: headers,
+      //   body: formData,
+      // });
+      
+ 
+      // if (!response.ok) {
+      //   throw new Error('Failed to add student');
+      // }
+      
+      // Alert.alert('Success', 'Student added successfully!');
+
+      let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: apiUrl+'/v1/students',
+        headers: {
+          'Authorization' : 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwianRpIjoiYWI5OTQ5YmUtZGU5MC00NDc0LWEwM2MtODVmYWQ5ZjIxZjRjIiwidHlwZSI6ImFjY2VzcyIsImZyZXNoIjpmYWxzZSwiY3NyZiI6IiIsImlhdCI6MTc0MTM0Mjc3MiwiZXhwIjoxNzQxMzc4NzcyLjM4NzQ5NSwidXNlcl90eXBlIjoic3RhZmYiLCJ1c2VyX2lkIjoyLCJ1c2VyX3JvbGUiOiJXb3JrZXIifQ.JFqgS0V2QKU-D8rxwYM-heZevpwXyP6rQSrHrbgeO2cdJkgvRimMftH6jYKEwKTv2dXdWvGgswga8PS2R5dcnGDhBaG5hge3gOSiY3YQZHUopfnT6VmUe_xT8-r2OQZgd2Q-BAEaSUXZfFCyKsxi2GyBWn22uIChrAnZIUqoV3SkDHTXafX2LLGkunx1INAAcRb_dC1DAc4-v8Dz-8JfisASG-8-2Bg6V7LE80wNWi6Aa2xoBoo_1CC9vEUGWuRQ5SoNUg6FMSAiQq1kR0dAsAh5F7C3tjnjWbWjc6GlA-ntp2bd7cVCuXOw6XoqkCBFK391CiVsvTalcrupAIpLhQ',
+          'Content-Type': 'multipart/form-data'
+        },
+        transformRequest: (data, headers) =>{
+          return formData;
+        }
+      };
+
+      // console.log(imageBlob)
+      // const response = await axios.post(apiUrl+'/v1/students', formData, {
+      //   headers: {
+      //     'Authorization' : 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwianRpIjoiYWI5OTQ5YmUtZGU5MC00NDc0LWEwM2MtODVmYWQ5ZjIxZjRjIiwidHlwZSI6ImFjY2VzcyIsImZyZXNoIjpmYWxzZSwiY3NyZiI6IiIsImlhdCI6MTc0MTM0Mjc3MiwiZXhwIjoxNzQxMzc4NzcyLjM4NzQ5NSwidXNlcl90eXBlIjoic3RhZmYiLCJ1c2VyX2lkIjoyLCJ1c2VyX3JvbGUiOiJXb3JrZXIifQ.JFqgS0V2QKU-D8rxwYM-heZevpwXyP6rQSrHrbgeO2cdJkgvRimMftH6jYKEwKTv2dXdWvGgswga8PS2R5dcnGDhBaG5hge3gOSiY3YQZHUopfnT6VmUe_xT8-r2OQZgd2Q-BAEaSUXZfFCyKsxi2GyBWn22uIChrAnZIUqoV3SkDHTXafX2LLGkunx1INAAcRb_dC1DAc4-v8Dz-8JfisASG-8-2Bg6V7LE80wNWi6Aa2xoBoo_1CC9vEUGWuRQ5SoNUg6FMSAiQq1kR0dAsAh5F7C3tjnjWbWjc6GlA-ntp2bd7cVCuXOw6XoqkCBFK391CiVsvTalcrupAIpLhQ',
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      //   transformRequest: (data, headers) =>{
+      //     return formData;
+      //   }
+      // })
+      axios.request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+        Alert.alert('Success', 'Student added successfully!');
+      })
+      .catch((error) => {
+        Alert.alert('Error', 'Failed to add student now!');
+        console.log(error);
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to add student');
-      }
-      
-      Alert.alert('Success', 'Student added successfully!');
+
     } catch (error) {
-      Alert.alert('Error', 'Failed to add student');
+      console.log(error)
+      Alert.alert('Error', 'Failed to add student here');
     }
   };
 
@@ -116,8 +218,9 @@ const AddStudent = () => {
       <Text style={styles.label}>Gender <Text style={styles.required}>*</Text></Text>
       <Picker style={styles.picker} selectedValue={form.gender} onValueChange={(value) => handleInputChange('gender', value)}>
         <Picker.Item label="Select Gender" value="" />
-        <Picker.Item label="Male" value="male" />
-        <Picker.Item label="Female" value="female" />
+        <Picker.Item label="Male" value="Male" />
+        <Picker.Item label="Female" value="Female" />
+        <Picker.Item label="Other" value="Other" />
       </Picker>
       
       <Text style={styles.label}>Mother Name <Text style={styles.required}>*</Text></Text>
