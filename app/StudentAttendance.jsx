@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ImageBackground, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,7 +40,7 @@ const StudentAttendance = () => {
     });
 
     try {
-      const response = await fetch('api de', {
+      const response = await fetch('API_ENDPOINT_HERE', {
         method: 'POST',
         body: formData,
         headers: {
@@ -55,57 +55,62 @@ const StudentAttendance = () => {
   };
 
   return (
-    <ImageBackground source={require('@/assets/images/bg-ds.jpg')} style={styles.backgroundImage} blurRadius={10}>
-      <SafeAreaView style={styles.safeContainer}>
-        <View style={styles.navBar}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="white" />
-            <Text style={styles.backText}>Back</Text>
-          </TouchableOpacity>
+    <SafeAreaView style={styles.safeContainer}>
+      {/* Navbar */}
+      <View style={styles.navBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Instructions Section - Moved to the Top */}
+        <View style={styles.instructionsContainer}>
+          <Text style={styles.instructionsTitle}>How It Works:</Text>
+          <Text style={styles.instruction}>• Tap "📸 Capture Attendance" to take a photo.</Text>
+          <Text style={styles.instruction}>• Ensure your face is clearly visible in the photo.</Text>
+          <Text style={styles.instruction}>• Tap "Submit" to mark your attendance.</Text>
+          <Text style={styles.instruction}>• Wait for a confirmation message.</Text>
         </View>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.container}>
-            <Text style={styles.title}>Student Attendance</Text>
-            <View style={styles.imageContainer}>
-              {image ? (
-                <Image source={{ uri: image }} style={styles.image} />
-              ) : (
-                <Text style={styles.placeholderText}>Click Capture Attendance Button</Text>
-              )}
-            </View>
-            <TouchableOpacity style={styles.captureButton} onPress={takePhoto}>
-              <Text style={styles.buttonText}>📸 Capture Attendance</Text>
-            </TouchableOpacity>
-            {image && (
-              <TouchableOpacity style={styles.submitButton} onPress={submitAttendance}>
-                <Text style={styles.buttonText}>✅ Submit</Text>
-              </TouchableOpacity>
+
+        {/* Main Content */}
+        <View style={styles.container}>
+          <Text style={styles.title}>Student Attendance</Text>
+
+          {/* Image Preview */}
+          <View style={styles.imageContainer}>
+            {image ? (
+              <Image source={{ uri: image }} style={styles.image} />
+            ) : (
+              <Text style={styles.placeholderText}>Click Capture Attendance Button</Text>
             )}
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </ImageBackground>
+
+          <TouchableOpacity style={styles.captureButton} onPress={takePhoto}>
+            <Text style={styles.buttonText}>📸 Capture Attendance</Text>
+          </TouchableOpacity>
+
+          {image && (
+            <TouchableOpacity style={styles.submitButton} onPress={submitAttendance}>
+              <Text style={styles.buttonText}>✅ Submit</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
   safeContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: '#ffffff',
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-  },
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   navBar: {
     width: '100%',
@@ -125,11 +130,35 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 5,
   },
+  instructionsContainer: {
+    width: '100%',
+    padding: 15,
+    backgroundColor: '#f8f9fa',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  instructionsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#444',
+    textAlign: 'center',
+  },
+  instruction: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 3,
+    textAlign: 'center',
+  },
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: 'white',
+    marginVertical: 20,
+    color: 'black',
   },
   captureButton: {
     backgroundColor: '#007bff',
@@ -163,8 +192,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   imageContainer: {
-    width: 350, 
-    height: 300, 
+    width: 350,
+    height: 300,
     borderWidth: 2,
     borderColor: '#ced4da',
     backgroundColor: '#e9ecef',
