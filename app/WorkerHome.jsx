@@ -47,6 +47,7 @@ const WorkerHome = () => {
         <OptionButton icon="shopping-bag" text="Ration" onPress={() => navigation.navigate('Ration')} />
         <OptionButton icon="home" text="Home Visit" onPress={() => navigation.navigate('HomeVisit')} />
         <OptionButton icon="cogs" text="Settings" onPress={() => navigation.navigate('Settings')} />
+        <OptionButton icon="user-plus" text="Add Beneficiaries" onPress={() => navigation.navigate('AddBeneficiaries')} />
       </View>
     </ScrollView>
   );
