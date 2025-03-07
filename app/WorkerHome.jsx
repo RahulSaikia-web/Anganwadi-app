@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Image, Modal, BackHandler } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Image, Modal, BackHandler, Animated, Easing } from 'react-native';
 import { useAuth } from './context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -9,10 +9,30 @@ const WorkerHome = () => {
   const { logout, user } = useAuth(); 
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const bounceAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true);
     return () => backHandler.remove();
+  }, []);
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(bounceAnim, {
+          toValue: -10,  // Move up
+          duration: 1050,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(bounceAnim, {
+          toValue: 0,  // Move down
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
   }, []);
 
   const handleLogout = async () => {
@@ -42,6 +62,12 @@ const WorkerHome = () => {
           </TouchableOpacity>
         </View>
 
+        {/* 🔥 Animated Bouncing App Icon */}
+        <Animated.Image
+          source={require('@/assets/images/app-icon.jpg')}
+          style={[styles.logoImage, { transform: [{ translateY: bounceAnim }] }]}
+        />
+
         {/* Options Section */}
         <View style={styles.optionsWrapper}>
           <View style={styles.optionsContainer}>
@@ -49,7 +75,6 @@ const WorkerHome = () => {
             <OptionButton icon="user-check" text="Self Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
             <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
             <OptionButton icon="users" text="All Student" onPress={() => navigation.navigate('AllStudent')} />
-            {/* <OptionButton icon="ellipsis-h" text="More" onPress={() => navigation.navigate('More')} /> */}
             <OptionButton icon="clipboard-list" text="Attendance" onPress={() => navigation.navigate('Attendance')} />
           </View>
         </View>
@@ -176,43 +201,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  modalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginVertical: 5,
-  },
-  modalText: {
-    fontSize: 16,
-  },
-  closeButton: {
-    marginTop: 15,
-    backgroundColor: 'red',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  closeButtonText: {
-    color: 'white',
-    fontSize: 16,
+  logoImage: {
+    marginTop: 20,
+    height: 200,
+    width: "80%",
+    marginLeft: "10%",
   },
 });
 
