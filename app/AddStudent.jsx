@@ -62,20 +62,31 @@ const AddStudent = () => {
     });
   };
 
-  const captureImage = async () => {
+  const loadImage = async (mode) => {
     try{
-      await ImagePicker.requestCameraPermissionsAsync();
-      let result = await ImagePicker.launchCameraAsync({
-        allowsEditing: false,
-        aspect: [1, 1],
-        quality: 1,
-      });
+      let result = {};
+      if (mode == 'gallery'){
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaType: ['image'],
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 1,
+        });
+      }else{
+        await ImagePicker.requestCameraPermissionsAsync();
+        result = await ImagePicker.launchCameraAsync({
+          allowsEditing: false,
+          aspect: [1, 1],
+          quality: 1,
+        });
+      }
 
       if (!result.canceled) {
         await saveImage(result.assets[0].uri);
       }
     } catch (error){
-      alert("Error capturing image: " + error.message);
+      alert("Error loading image: " + error.message);
     }
   }
 
@@ -249,11 +260,11 @@ const AddStudent = () => {
       
       <Text style={styles.label}>Photo <Text style={styles.required}>*</Text></Text>
       <View style={styles.buttonContainer}>
-        <Button title="Pick Photo" onPress={handleImagePick} />
+        <Button title="Pick Photo" onPress={() => { loadImage('gallery')}} />
         <View style={styles.buttonSpacing} />
-        <Button title="Take Photo" onPress={() => { captureImage()}} />
+        <Button title="Take Photo" onPress={() => { loadImage()}} />
       </View>
-      {form.photo && <Image source={{ uri: form.photo.uri }} style={styles.image} />}
+      {image && <Image source={{ uri: image }} style={styles.image} />}
       
       <View style={styles.buttonSpacing} />
       <Button title="Submit" onPress={handleSubmit} color="#28a745" />
