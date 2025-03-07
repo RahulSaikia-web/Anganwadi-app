@@ -55,7 +55,7 @@ const WorkerHome = () => {
         <OptionButton icon="user-plus" text="Add Student" onPress={() => navigation.navigate('AddStudent')} />
         <OptionButton icon="users" text="All Helpers" onPress={() => navigation.navigate('AllHelpers')} />
         <OptionButton icon="user-plus" text="Add Helper" onPress={() => navigation.navigate('AddHelper')} />
-        <OptionButton icon="user-check" text="Self Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
+        <OptionButton icon="user-check" text="Staff Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
         <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
         <OptionButton icon="users" text="All Student" onPress={() => navigation.navigate('AllStudent')} />
         <OptionButton icon="clipboard-list" text="Attendance" onPress={() => navigation.navigate('Attendance')} />
