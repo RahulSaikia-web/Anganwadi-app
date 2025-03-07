@@ -20,13 +20,13 @@ const WorkerHome = () => {
     Animated.loop(
       Animated.sequence([
         Animated.timing(bounceAnim, {
-          toValue: -10,  // Move up
+          toValue: -10,  
           duration: 1050,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
         Animated.timing(bounceAnim, {
-          toValue: 0,  // Move down
+          toValue: 0,  
           duration: 800,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
@@ -43,7 +43,6 @@ const WorkerHome = () => {
   return (
     <ImageBackground source={require('@/assets/images/bg-ds.jpg')} style={styles.background} blurRadius={10}>
       <View style={styles.container}>
-        {/* Worker Info Section */}
         <View style={styles.userInfoContainer}>
           <TouchableOpacity style={styles.profileSection} onPress={() => setModalVisible(true)}>
             <Image source={require('@/assets/images/profile.webp')} style={styles.profileIcon} />
@@ -65,7 +64,6 @@ const WorkerHome = () => {
           style={[styles.logoImage, { transform: [{ translateY: bounceAnim }] }]}
         />
 
-        {/* Options Section */}
         <View style={styles.optionsWrapper}>
           <View style={styles.optionsContainer}>
             <OptionButton icon="user-plus" text="Add Student" onPress={() => navigation.navigate('AddStudent')} />
@@ -76,8 +74,6 @@ const WorkerHome = () => {
           </View>
         </View>
       </View>
-
-      {/* Modal for User Details */}
       <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
