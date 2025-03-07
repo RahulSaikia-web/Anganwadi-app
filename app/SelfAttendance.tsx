@@ -64,7 +64,6 @@ const SelfAttendance = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Instructions Section - Moved to the Top */}
       <View style={styles.instructionsContainer}>
 
         <Text style={styles.instructionsTitle}>How It Works:</Text>
@@ -74,10 +73,8 @@ const SelfAttendance = () => {
         <Text style={styles.instruction}>• Wait for a confirmation message.</Text>
       </View>
 
-      {/* Main Content */}
       <View style={styles.container}>
 
-        {/* Image Preview */}
         <View style={styles.imageContainer}>
           {image ? (
             <Image source={{ uri: image }} style={styles.image} />

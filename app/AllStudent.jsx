@@ -7,7 +7,6 @@ const AllStudent = () => {
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
 
-  // Sample student data (Replace with API call or database fetch)
   const [students, setStudents] = useState([
     { id: '1', name: 'Rahul Sharma', phone: '9876543210', mother: 'Anita Sharma', father: 'Rajesh Sharma' },
     { id: '2', name: 'Pooja Verma', phone: '9123456789', mother: 'Sunita Verma', father: 'Rakesh Verma' },
@@ -21,14 +20,12 @@ const AllStudent = () => {
     { id: '10', name: 'Deepika Rao', phone: '7546983210', mother: 'Savita Rao', father: 'Shankar Rao' },
   ]);
 
-  // Refresh function
   const onRefresh = useCallback(() => {
     setRefreshing(true);
 
-    // Simulate a data fetch (replace with API call)
     setTimeout(() => {
       setRefreshing(false);
-    }, 1500); // Simulating network delay
+    }, 1500); 
   }, []);
 
   return (
@@ -41,7 +38,6 @@ const AllStudent = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Student List with Refresh Control */}
       <FlatList
         data={students}
         keyExtractor={(item) => item.id}
