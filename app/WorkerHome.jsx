@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#8B0000',
     marginTop: 8,
     textAlign: 'center',
   },
