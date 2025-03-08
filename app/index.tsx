@@ -38,6 +38,11 @@ const Index = () => {
               </View>
             </View>
           </Link>
+          <Link href="/Admin">
+            <View style={styles.admin}>
+                <Text style={styles.admintxt}>Admin Login</Text>
+            </View>
+          </Link>
         </View>
       </ImageBackground>
     </View>
@@ -57,6 +62,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 20,
+  },
+  admin:{
+    padding:10,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  admintxt:{
+    color:"black"
   },
   loginBox: {
     width: 300,
