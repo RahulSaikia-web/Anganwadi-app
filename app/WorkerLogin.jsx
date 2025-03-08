@@ -3,9 +3,13 @@ import { View, Text, TextInput,Image, TouchableOpacity, StyleSheet, Alert, Image
 import background from '@/assets/images/lg-bg.jpg';
 import { useRouter } from 'expo-router';
 import { useAuth } from './context/AuthContext';
+import * as SecureStore from 'expo-secure-store';
+
+async function storeSave(key, value) {
+  await SecureStore.setItemAsync(key, value);
+}
 
 const WorkerLogin = () => {
-  let JWT_token;
   const apiUrl = 'https://magicminute.online/api';
   const router = useRouter();
   const { login } = useAuth();
@@ -35,15 +39,13 @@ const WorkerLogin = () => {
       const data = await response.json();
       if (response.ok) {
         await login('worker');
-        JWT_token= data.access_token;
+        await storeSave("JWT-Token", data.access_token)
                        
-        router.replace('/WorkerHome',{
-          token:JWT_token,
-        });
       } else {
         Alert.alert('Error', data.message || 'Login failed');
       }
     } catch (error) {
+      console.log(error)
       Alert.alert('Error', 'Something went wrong. Please try again later.');
     }
   };

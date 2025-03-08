@@ -3,9 +3,18 @@ import { View, Text, TextInput, Button, Alert, StyleSheet, Image} from 'react-na
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
 
 const FormData = global.FormData;
-  
+
+async function storeGetValueFor(key) {
+  let result = await SecureStore.getItemAsync(key);
+  if (result)
+  {
+    return result;
+  }
+}
+
 const AddStudent = () => {
   const [image, setImage] = useState();
   const apiUrl = 'https://magicminute.online/api';
@@ -79,13 +88,13 @@ const AddStudent = () => {
       if (image){
         formData.append('student_image_file', image.base64);
       }
-        
+        let JWT_Token = await storeGetValueFor("JWT-Token");
         let config = {
           method: 'post',
           maxBodyLength: Infinity,
           url: apiUrl+'/v1/students/',
           headers: {
-            'Authorization' : 'Bearer ',
+            'Authorization' : 'Bearer ' + JWT_Token,
             'Content-Type': 'multipart/form-data'
           },
           data: formData
