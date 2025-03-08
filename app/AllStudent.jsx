@@ -75,7 +75,7 @@ const AllStudent = () => {
           <View style={styles.studentCard}>
             <Text style={styles.serialNumber}>{index + 1}.</Text>
             <View>
-              <Text style={styles.details}>👩‍👦 Name : {item.student_full_name}</Text>
+              <Text style={styles.details}>👩‍👦 Student : {item.student_full_name}</Text>
               <Text style={styles.details}>📞Phone : {item.student_phone}</Text>
               <Text style={styles.details}>👩‍👦 Mother: {item.student_mother_name}</Text>
               <Text style={styles.details}>👨‍👦 Father: {item.student_father_name}</Text>
