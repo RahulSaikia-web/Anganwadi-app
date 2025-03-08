@@ -40,7 +40,8 @@ const WorkerLogin = () => {
       if (response.ok) {
         await login('worker');
         await storeSave("JWT-Token", data.access_token)
-                       
+        router.replace('/WorkerHome');
+        
       } else {
         Alert.alert('Error', data.message || 'Login failed');
       }
