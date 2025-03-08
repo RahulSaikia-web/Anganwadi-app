@@ -44,7 +44,7 @@ const SupervisorLogin = () => {
   };
 
   return (
-    <ImageBackground source={background} style={styles.image} blurRadius={5}>
+    // <ImageBackground source={background} style={styles.image} blurRadius={5}>
       <View style={styles.container}>
         <Text style={styles.title}>Supervisor Login</Text>
         <TextInput
@@ -68,7 +68,7 @@ const SupervisorLogin = () => {
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
       </View>
-    </ImageBackground>
+    // </ImageBackground>
   );
 };
 

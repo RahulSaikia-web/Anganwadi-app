@@ -2,24 +2,24 @@ import { View, Text, StyleSheet, ImageBackground } from 'react-native';
 import { useAuth } from './context/AuthContext';
 import React, { useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import background from '@/assets/images/bg-img.jpg';
+import background from '@/assets/images/lg-bg.jpg';
 import { Link, useRouter } from 'expo-router';
 
 const Index = () => {
   const { userRole } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (userRole === 'supervisor') {
-      router.replace('/SupervisorHome');
-    } else if (userRole === 'worker') {
-      router.replace('/WorkerHome');
-    }
-  }, [userRole]);
+  // useEffect(() => {
+  //   if (userRole === 'supervisor') {
+  //     router.replace('/SupervisorHome');
+  //   } else if (userRole === 'worker') {
+  //     router.replace('/WorkerHome');
+  //   }
+  // }, [userRole]);
 
   return (
     <View style={styles.container}>
-      <ImageBackground source={background} style={styles.image} blurRadius={5}>
+      <ImageBackground source={background} style={styles.image} blurRadius={1}>
         <View style={styles.contentContainer}>
           <Link href="/SupervisorLogin">
             <View style={styles.loginBox}>
