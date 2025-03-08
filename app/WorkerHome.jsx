@@ -23,12 +23,6 @@ const WorkerHome = () => {
       { text: 'Logout', onPress: () =>  navigation.replace('index')},
     ]);
   };
-  // const user = {
-  //   name: 'Rahul Saikia',
-  //   phone: '9387394822',
-  //   aadhar: '1234-5678-9012',
-  //   role: 'Worker',
-  // };
   useEffect(()=>{
       getStudents()
     },[])
