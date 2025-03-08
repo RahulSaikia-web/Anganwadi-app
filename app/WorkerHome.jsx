@@ -17,11 +17,14 @@ const WorkerHome = () => {
   const navigation = useNavigation();
   const [staffData,setstaffData] = useState()
   const [modalVisible, setModalVisible] = useState(false);
+
+
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Logout', onPress: () =>  navigation.replace('index')},
     ]);
+    
   };
   useEffect(()=>{
       getStudents()

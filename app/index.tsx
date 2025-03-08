@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground , Image} from 'react-native';
 import { useAuth } from './context/AuthContext';
 import React, { useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,23 +9,27 @@ const Index = () => {
   const { userRole } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (userRole === 'supervisor') {
-      router.replace('/SupervisorHome');
-    } else if (userRole === 'worker') {
-      router.replace('/WorkerHome');
-    }
-  }, [userRole]);
+  // useEffect(() => {
+  //   if (userRole === 'supervisor') {
+  //     router.replace('/SupervisorHome');
+  //   } else if (userRole === 'worker') {
+  //     router.replace('/WorkerHome');
+  //   }
+  // }, [userRole]);
 
   return (
     <View style={styles.container}>
       <ImageBackground source={background} style={styles.image} blurRadius={1}>
+      <View style={styles.imgCn}>
+      <Image source={require('@/assets/images/app-icon.jpg')}style={styles.logo} />
+        </View>
+
         <View style={styles.contentContainer}>
           <Link href="/SupervisorLogin">
             <View style={styles.loginBox}>
               <View style={styles.innerBox}>
                 <Ionicons name="person" size={40} color="white" />
-                <Text style={styles.loginText}>Login As Supervisor</Text>
+                <Text style={styles.loginText}>Supervisor Login</Text>
               </View>
             </View>
           </Link>
@@ -34,13 +38,8 @@ const Index = () => {
             <View style={styles.loginBox2}>
               <View style={styles.innerBox}>
                 <Ionicons name="people" size={40} color="white" />
-                <Text style={styles.loginText}>Login As Worker</Text>
+                <Text style={styles.loginText}>Worker Login</Text>
               </View>
-            </View>
-          </Link>
-          <Link href="/Admin">
-            <View style={styles.admin}>
-                <Text style={styles.admintxt}>Admin Login</Text>
             </View>
           </Link>
         </View>
@@ -72,6 +71,12 @@ const styles = StyleSheet.create({
   admintxt:{
     color:"black"
   },
+  logo:{
+    height:"100%",
+    width:"100%",
+    resizeMode:"cover",
+    borderRadius: 10,
+  },
   loginBox: {
     width: 300,
     height: 200,
@@ -98,6 +103,13 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
+ 
+  imgCn:{
+    marginLeft:"10%",
+    height:200,
+    marginTop:"10%",
+    width:"80%",
+  },
   innerBox: {
     width: "100%",
     height: "100%",
@@ -111,7 +123,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
-    textTransform: "uppercase",
     marginTop: 10, // Add spacing between icon and text
   },
 });
