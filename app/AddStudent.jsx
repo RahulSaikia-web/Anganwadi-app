@@ -8,7 +8,10 @@ import moment from 'moment';
 import { useNavigation } from '@react-navigation/native';  // Import useNavigation
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
-const FormData = global.FormData;
+import * as FileSystem from 'expo-file-system';
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+
+DateTimePickerAndroid.open(AndroidNativeProps)
 
 async function storeGetValueFor(key) {
   let result = await SecureStore.getItemAsync(key);
@@ -20,6 +23,7 @@ async function storeGetValueFor(key) {
 const AddStudent = () => {
   const navigation = useNavigation();  // Initialize navigation hook
   const [image, setImage] = useState();
+
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [birthDate, setBirthDate] = useState('');
 
@@ -28,12 +32,15 @@ const AddStudent = () => {
 
   const apiUrl = 'https://magicminute.online/api';
   const [form, setForm] = useState({
-    studentName: '',
-    dob: '',
-    gender: '',
-    motherName: '',
-    fatherName: '',
-    phoneNumber: '',
+    student_full_name: '',
+    student_dob: '',
+    student_gender: '',
+    student_mother_name: '',
+    student_father_name: '',
+    student_phone: '',
+    student_aadhar: '',
+    student_center_id: 0,
+    student_image: '',
   });
 
   const handleInputChange = (name, value) => {
@@ -50,19 +57,18 @@ const AddStudent = () => {
           allowsEditing: true,
           aspect: [1, 1],
           quality: 1,
-          base64: true,
         });
       } else {
         await ImagePicker.requestCameraPermissionsAsync();
         result = await ImagePicker.launchCameraAsync({
           allowsEditing: false,
           aspect: [1, 1],
-          base64: true,
           quality: 1,
         });
       }
 
       if (!result.canceled) {
+        await uploadImage(result.assets[0].uri)
         await saveImage(result.assets[0]);
       }
     } catch (error) {
@@ -72,11 +78,34 @@ const AddStudent = () => {
 
   const saveImage = async (image) => {
     try {
-      setImage(image);
+      setImage(image)
     } catch (error) {
       throw error;
     }
   };
+
+
+  const uploadImage = async (uri) =>{
+    console.log("Upload start")
+    let JWT_Token = await storeGetValueFor('JWT-Token');
+    try {
+      const response = await FileSystem.uploadAsync(apiUrl+ '/v1/images/students/', uri, {
+        fieldName: 'image_file',
+        httpMethod: 'POST',
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        headers : {
+          Authorization: 'Bearer ' + JWT_Token,
+        }
+      });
+
+      if (response.status === 200)
+      {
+        setForm({ ...form, [student_image]: value });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const handleSubmit = async () => {
     if (Object.values(form).some((value) => !value)) {
@@ -84,41 +113,31 @@ const AddStudent = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('student_full_name', form.studentName);
-    formData.append('student_dob', form.dob);
-    formData.append('student_gender', form.gender);
-    formData.append('student_mother_name', form.motherName);
-    formData.append('student_father_name', form.fatherName);
-    formData.append('student_phone', form.phoneNumber);
-    formData.append('student_center_id', 0);
-
     try {
-      if (image) {
-        formData.append('student_image_file', image.base64);
-      }
-      let JWT_Token = await storeGetValueFor('JWT-Token');
-      let config = {
-        method: 'post',
-        maxBodyLength: Infinity,
-        url: apiUrl + '/v1/students/',
-        headers: {
-          Authorization: 'Bearer ' + JWT_Token,
-          'Content-Type': 'multipart/form-data',
-        },
-        data: formData,
-      };
-      console.log(formData);
-      axios
-        .request(config)
-        .then((response) => {
-          console.log(JSON.stringify(response.data));
-          Alert.alert('Success', 'Student added successfully!');
-        })
-        .catch((error) => {
-          Alert.alert('Error', 'Failed to add student nowww!');
-          console.log(error.response.data);
-        });
+
+        let JWT_Token = await storeGetValueFor('JWT-Token');
+        let config = {
+          method: 'post',
+          maxBodyLength: Infinity,
+          url: apiUrl + '/v1/students/',
+          headers: {
+            Authorization: 'Bearer ' + JWT_Token,
+            'Content-Type': 'application/json',
+          },
+          data: form,
+        };
+        console.log(form);
+        axios
+          .request(config)
+          .then((response) => {
+            console.log(JSON.stringify(response.data));
+            Alert.alert('Success', 'Student added successfully!');
+          })
+          .catch((error) => {
+            Alert.alert('Error', 'Failed to add student nowww!');
+            console.log(error.response.data);
+          });
+
     } catch (error) {
       console.log(error);
       Alert.alert('Error', 'Failed to add student here');
@@ -138,36 +157,14 @@ const AddStudent = () => {
         <Text style={styles.label}>
           Student Name <Text style={styles.required}>*</Text>
         </Text>
-        <TextInput style={styles.input} maxLength={30} onChangeText={(value) => handleInputChange('studentName', value)} />
-        <TouchableOpacity onPress={showDatePicker}>
-          <Text style={styles.title}>
-            Student Date Of Birth <Text style={styles.required}>*</Text>
-          </Text>
-          <TextInput
-            numberOfLines={1}
-            editable={false}
-            placeholder="Student Date Of Birth"
-            value={birthDate ? moment(birthDate).format('DD MMMM, YYYY') : ''}
-            style={styles.input1}
-          />
-          <DatePicker
-            modal
-            open={isDatePickerVisible}
-            date={birthDate ? new Date(birthDate) : new Date()}
-            onConfirm={(date) => {
-              setDatePickerVisibility(false);
-              setBirthDate(date);
-            }}
-            onCancel={hideDatePicker}
-            mode="date"
-            maximumDate={new Date(moment().subtract(1, 'days'))}
-          />
-        </TouchableOpacity>
+        <TextInput style={styles.input} maxLength={30} onChangeText={(value) => handleInputChange('student_full_name', value)} />
+
+        <RNDateTimePicker/>
 
         <Text style={styles.label}>
           Gender <Text style={styles.required}>*</Text>
         </Text>
-        <Picker style={styles.picker} selectedValue={form.gender} onValueChange={(value) => handleInputChange('gender', value)}>
+        <Picker style={styles.picker} selectedValue={form.gender} onValueChange={(value) => handleInputChange('student_gender', value)}>
           <Picker.Item label="Select Gender" value="" />
           <Picker.Item label="Male" value="Male" />
           <Picker.Item label="Female" value="Female" />
@@ -177,17 +174,22 @@ const AddStudent = () => {
         <Text style={styles.label}>
           Mother Name <Text style={styles.required}>*</Text>
         </Text>
-        <TextInput style={styles.input} onChangeText={(value) => handleInputChange('motherName', value)} />
+        <TextInput style={styles.input} onChangeText={(value) => handleInputChange('student_mother_name', value)} />
 
         <Text style={styles.label}>
           Father Name <Text style={styles.required}>*</Text>
         </Text>
-        <TextInput style={styles.input} onChangeText={(value) => handleInputChange('fatherName', value)} />
+        <TextInput style={styles.input} onChangeText={(value) => handleInputChange('student_father_name', value)} />
 
         <Text style={styles.label}>
           Phone Number <Text style={styles.required}>*</Text>
         </Text>
-        <TextInput style={styles.input} keyboardType="phone-pad" onChangeText={(value) => handleInputChange('phoneNumber', value)} />
+        <TextInput style={styles.input} keyboardType="phone-pad" onChangeText={(value) => handleInputChange('student_phone', value)} />
+
+        <Text style={styles.label}>
+          Aadhar Number <Text style={styles.required}>*</Text>
+        </Text>
+        <TextInput style={styles.input} keyboardType="phone-pad" onChangeText={(value) => handleInputChange('student_aadhar', value)} />
 
         <Text style={styles.label}>
           Photo <Text style={styles.required}>*</Text>
