@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ImageBackground } from 'react-native';
 import { useAuth } from './context/AuthContext';
 import React, { useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import background from '@/assets/images/bg-img.jpg';
+import background from '@/assets/images/lg-bg.jpg';
 import { Link, useRouter } from 'expo-router';
 
 const Index = () => {
@@ -19,7 +19,7 @@ const Index = () => {
 
   return (
     <View style={styles.container}>
-      {/* <ImageBackground source={background} style={styles.image} blurRadius={5}> */}
+      <ImageBackground source={background} style={styles.image} blurRadius={1}>
         <View style={styles.contentContainer}>
           <Link href="/SupervisorLogin">
             <View style={styles.loginBox}>
@@ -39,7 +39,7 @@ const Index = () => {
             </View>
           </Link>
         </View>
-      {/* </ImageBackground> */}
+      </ImageBackground>
     </View>
   );
 };
