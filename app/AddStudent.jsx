@@ -1,22 +1,31 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, Image} from 'react-native';
+import { View, Text, TextInput, Button, Alert, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
+import DatePicker from 'react-native-date-picker';
 import axios from 'axios';
+import moment from 'moment';
+import { useNavigation } from '@react-navigation/native';  // Import useNavigation
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
-
 const FormData = global.FormData;
 
 async function storeGetValueFor(key) {
   let result = await SecureStore.getItemAsync(key);
-  if (result)
-  {
+  if (result) {
     return result;
   }
 }
 
 const AddStudent = () => {
+  const navigation = useNavigation();  // Initialize navigation hook
   const [image, setImage] = useState();
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [birthDate, setBirthDate] = useState('');
+
+  const showDatePicker = () => setDatePickerVisibility(true);
+  const hideDatePicker = () => setDatePickerVisibility(false);
+
   const apiUrl = 'https://magicminute.online/api';
   const [form, setForm] = useState({
     studentName: '',
@@ -32,18 +41,18 @@ const AddStudent = () => {
   };
 
   const loadImage = async (mode) => {
-    try{
+    try {
       let result = {};
-      if (mode == 'gallery'){
+      if (mode == 'gallery') {
         await ImagePicker.requestMediaLibraryPermissionsAsync();
         result = await ImagePicker.launchImageLibraryAsync({
           mediaType: ['image'],
           allowsEditing: true,
           aspect: [1, 1],
           quality: 1,
-          base64: true
+          base64: true,
         });
-      }else{
+      } else {
         await ImagePicker.requestCameraPermissionsAsync();
         result = await ImagePicker.launchCameraAsync({
           allowsEditing: false,
@@ -56,18 +65,18 @@ const AddStudent = () => {
       if (!result.canceled) {
         await saveImage(result.assets[0]);
       }
-    } catch (error){
-      alert("Error loading image: " + error);
+    } catch (error) {
+      alert('Error loading image: ' + error);
     }
-  }
+  };
 
   const saveImage = async (image) => {
     try {
       setImage(image);
-    } catch (error){
+    } catch (error) {
       throw error;
     }
-  }
+  };
 
   const handleSubmit = async () => {
     if (Object.values(form).some((value) => !value)) {
@@ -82,79 +91,118 @@ const AddStudent = () => {
     formData.append('student_mother_name', form.motherName);
     formData.append('student_father_name', form.fatherName);
     formData.append('student_phone', form.phoneNumber);
-    formData.append("student_center_id", 0)
-   
+    formData.append('student_center_id', 0);
+
     try {
-      if (image){
+      if (image) {
         formData.append('student_image_file', image.base64);
       }
-        let JWT_Token = await storeGetValueFor("JWT-Token");
-        let config = {
-          method: 'post',
-          maxBodyLength: Infinity,
-          url: apiUrl+'/v1/students/',
-          headers: {
-            'Authorization' : 'Bearer ' + JWT_Token,
-            'Content-Type': 'multipart/form-data'
-          },
-          data: formData
-        };
-        console.log(formData)
-        axios.request(config)
+      let JWT_Token = await storeGetValueFor('JWT-Token');
+      let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: apiUrl + '/v1/students/',
+        headers: {
+          Authorization: 'Bearer ' + JWT_Token,
+          'Content-Type': 'multipart/form-data',
+        },
+        data: formData,
+      };
+      console.log(formData);
+      axios
+        .request(config)
         .then((response) => {
           console.log(JSON.stringify(response.data));
           Alert.alert('Success', 'Student added successfully!');
         })
         .catch((error) => {
-          Alert.alert('Error', 'Failed to add student nowwww!');
+          Alert.alert('Error', 'Failed to add student nowww!');
           console.log(error.response.data);
         });
-
     } catch (error) {
-      console.log(error)
+      console.log(error);
       Alert.alert('Error', 'Failed to add student here');
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Student Name <Text style={styles.required}>*</Text></Text>
-      <TextInput style={styles.input} maxLength={30} onChangeText={(value) => handleInputChange('studentName', value)} />
-      
-      <Text style={styles.label}>Date of Birth <Text style={styles.required}>*</Text></Text>
-      <TextInput style={styles.input} placeholder="YYYY-MM-DD" onChangeText={(value) => handleInputChange('dob', value)} />
-      
-      <Text style={styles.label}>Gender <Text style={styles.required}>*</Text></Text>
-      <Picker style={styles.picker} selectedValue={form.gender} onValueChange={(value) => handleInputChange('gender', value)}>
-        <Picker.Item label="Select Gender" value="" />
-        <Picker.Item label="Male" value="Male" />
-        <Picker.Item label="Female" value="Female" />
-        <Picker.Item label="Other" value="Other" />
-      </Picker>
-      
-      <Text style={styles.label}>Mother Name <Text style={styles.required}>*</Text></Text>
-      <TextInput style={styles.input} onChangeText={(value) => handleInputChange('motherName', value)} />
-      
-      <Text style={styles.label}>Father Name <Text style={styles.required}>*</Text></Text>
-      <TextInput style={styles.input} onChangeText={(value) => handleInputChange('fatherName', value)} />
-      
-      <Text style={styles.label}>Phone Number <Text style={styles.required}>*</Text></Text>
-      <TextInput style={styles.input} keyboardType="phone-pad" onChangeText={(value) => handleInputChange('phoneNumber', value)} />
-      
-      <Text style={styles.label}>Center ID <Text style={styles.required}>*</Text></Text>
-      <TextInput style={styles.input} onChangeText={(value) => handleInputChange('centerId', value)} />
-      
-      <Text style={styles.label}>Photo <Text style={styles.required}>*</Text></Text>
-      <View style={styles.buttonContainer}>
-        <Button title="Pick Photo" onPress={() => { loadImage('gallery')}} />
-        <View style={styles.buttonSpacing} />
-        <Button title="Take Photo" onPress={() => { loadImage()}} />
+    <ScrollView>
+      {/* Navbar */}
+      <View style={styles.navbar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="white" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
       </View>
-      {image && <Image source={{ uri: image.uri }} style={styles.image} />}
-      
-      <View style={styles.buttonSpacing} />
-      <Button title="Submit" onPress={handleSubmit} color="#28a745" />
-    </View>
+      <View style={styles.container}>
+        <Text style={styles.label}>
+          Student Name <Text style={styles.required}>*</Text>
+        </Text>
+        <TextInput style={styles.input} maxLength={30} onChangeText={(value) => handleInputChange('studentName', value)} />
+        <TouchableOpacity onPress={showDatePicker}>
+          <Text style={styles.title}>
+            Student Date Of Birth <Text style={styles.required}>*</Text>
+          </Text>
+          <TextInput
+            numberOfLines={1}
+            editable={false}
+            placeholder="Student Date Of Birth"
+            value={birthDate ? moment(birthDate).format('DD MMMM, YYYY') : ''}
+            style={styles.input1}
+          />
+          <DatePicker
+            modal
+            open={isDatePickerVisible}
+            date={birthDate ? new Date(birthDate) : new Date()}
+            onConfirm={(date) => {
+              setDatePickerVisibility(false);
+              setBirthDate(date);
+            }}
+            onCancel={hideDatePicker}
+            mode="date"
+            maximumDate={new Date(moment().subtract(1, 'days'))}
+          />
+        </TouchableOpacity>
+
+        <Text style={styles.label}>
+          Gender <Text style={styles.required}>*</Text>
+        </Text>
+        <Picker style={styles.picker} selectedValue={form.gender} onValueChange={(value) => handleInputChange('gender', value)}>
+          <Picker.Item label="Select Gender" value="" />
+          <Picker.Item label="Male" value="Male" />
+          <Picker.Item label="Female" value="Female" />
+          <Picker.Item label="Other" value="Other" />
+        </Picker>
+
+        <Text style={styles.label}>
+          Mother Name <Text style={styles.required}>*</Text>
+        </Text>
+        <TextInput style={styles.input} onChangeText={(value) => handleInputChange('motherName', value)} />
+
+        <Text style={styles.label}>
+          Father Name <Text style={styles.required}>*</Text>
+        </Text>
+        <TextInput style={styles.input} onChangeText={(value) => handleInputChange('fatherName', value)} />
+
+        <Text style={styles.label}>
+          Phone Number <Text style={styles.required}>*</Text>
+        </Text>
+        <TextInput style={styles.input} keyboardType="phone-pad" onChangeText={(value) => handleInputChange('phoneNumber', value)} />
+
+        <Text style={styles.label}>
+          Photo <Text style={styles.required}>*</Text>
+        </Text>
+        <View style={styles.buttonContainer}>
+          <Button title="Pick Photo" onPress={() => loadImage('gallery')} />
+          <View style={styles.buttonSpacing} />
+          <Button title="Take Photo" onPress={() => loadImage()} />
+        </View>
+        {image && <Image source={{ uri: image.uri }} style={styles.image} />}
+
+        <View style={styles.buttonSpacing} />
+        <Button title="Submit" onPress={handleSubmit} color="#28a745" />
+      </View>
+    </ScrollView>
   );
 };
 
@@ -200,6 +248,22 @@ const styles = StyleSheet.create({
   buttonSpacing: {
     height: 10,
   },
+  input1: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'lightgray',
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  title: {
+    color: '#000',
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  navbar: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'darkred', padding: 15 },
+  backButton: { flexDirection: 'row', alignItems: 'center' },
+  backText: { color: 'white', fontSize: 18, marginLeft: 5 },
+  navTitle: { fontSize: 20, color: 'darkred', fontWeight: 'bold', marginLeft: 15 },
 });
 
 export default AddStudent;
