@@ -9,17 +9,17 @@ const Index = () => {
   const { userRole } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (userRole === 'supervisor') {
-      router.replace('/SupervisorHome');
-    } else if (userRole === 'worker') {
-      router.replace('/WorkerHome');
-    }
-  }, [userRole]);
+  // useEffect(() => {
+  //   if (userRole === 'supervisor') {
+  //     router.replace('/SupervisorHome');
+  //   } else if (userRole === 'worker') {
+  //     router.replace('/WorkerHome');
+  //   }
+  // }, [userRole]);
 
   return (
     <View style={styles.container}>
-      <ImageBackground source={background} style={styles.image} blurRadius={5}>
+      {/* <ImageBackground source={background} style={styles.image} blurRadius={5}> */}
         <View style={styles.contentContainer}>
           <Link href="/SupervisorLogin">
             <View style={styles.loginBox}>
@@ -39,7 +39,7 @@ const Index = () => {
             </View>
           </Link>
         </View>
-      </ImageBackground>
+      {/* </ImageBackground> */}
     </View>
   );
 };

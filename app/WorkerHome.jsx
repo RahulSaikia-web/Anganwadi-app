@@ -16,8 +16,8 @@ const WorkerHome = () => {
     ]);
   };
   const user = {
-    name: 'Dipalee Das',
-    phone: '9876543210',
+    name: 'Rahul Saikia',
+    phone: '9387394822',
     aadhar: '1234-5678-9012',
     role: 'Worker',
   };
@@ -29,7 +29,7 @@ const WorkerHome = () => {
         <Image source={require('@/assets/images/profile.webp')} style={styles.profileImage} />
         <View>
           <Text style={styles.userName}>{user.name}</Text>
-          <Text style={styles.userLocation}>Era Dighalpan Das Gaon (18292051008)</Text>
+          <Text style={styles.userLocation}>Golaghat (18292051008)</Text>
         </View>
       </TouchableOpacity>
 

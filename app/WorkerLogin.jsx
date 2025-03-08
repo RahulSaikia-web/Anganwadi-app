@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ImageBackground } from 'react-native';
-import background from '@/assets/images/log-bg.jpg';
+import { View, Text, TextInput,Image, TouchableOpacity, StyleSheet, Alert, ImageBackground } from 'react-native';
+import background from '@/assets/images/lg-bg.jpg';
 import { useRouter } from 'expo-router';
 import { useAuth } from './context/AuthContext';
 
@@ -49,8 +49,11 @@ const WorkerLogin = () => {
   };
 
   return (
-    <ImageBackground source={background} style={styles.image} blurRadius={5}>
+    <ImageBackground source={background} style={styles.image} blurRadius={1}>
       <View style={styles.container}>
+      <View style={styles.imgCn}>
+      <Image source={require('@/assets/images/app-icon.jpg')}style={styles.logo} />
+      </View>
         <Text style={styles.title}>Worker Login</Text>
         <TextInput
           style={styles.input}
@@ -85,6 +88,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 10,
   },
+  imgCn:{
+    height:200,
+    width:"80%",
+    marginBottom:"20",
+  },
   image: {
     flex: 1,
     width: '100%',
@@ -95,6 +103,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 30,
     color: '#fff',
+  },
+  logo:{
+    height:"100%",
+    width:"100%",
+    resizeMode:"cover",
+    borderRadius: 10,
   },
   input: {
     width: '90%',
