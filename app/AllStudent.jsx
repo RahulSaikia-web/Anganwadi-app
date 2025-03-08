@@ -69,7 +69,7 @@ const AllStudent = () => {
 
       <FlatList
         data={studensList}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id ? item.student_id.toString() : `${item.student_full_name}-${item.student_phone}`}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item, index }) => (
           <View style={styles.studentCard}>
