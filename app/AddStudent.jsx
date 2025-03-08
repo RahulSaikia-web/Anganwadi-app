@@ -16,8 +16,6 @@ const AddStudent = () => {
     motherName: '',
     fatherName: '',
     phoneNumber: '',
-    centerId: '',
-    photo: null,
   });
 
   const handleInputChange = (name, value) => {
@@ -69,13 +67,13 @@ const AddStudent = () => {
     }
 
     const formData = new FormData();
-    formData.append('student_name', form.studentName);
+    formData.append('student_full_name', form.studentName);
     formData.append('student_dob', form.dob);
     formData.append('student_gender', form.gender);
     formData.append('student_mother_name', form.motherName);
     formData.append('student_father_name', form.fatherName);
     formData.append('student_phone', form.phoneNumber);
-    formData.append('student_center_id', form.centerId);
+    formData.append("student_center_id", 0)
    
     try {
       if (image){
@@ -85,14 +83,14 @@ const AddStudent = () => {
         let config = {
           method: 'post',
           maxBodyLength: Infinity,
-          url: apiUrl+'/v1/students',
+          url: apiUrl+'/v1/students/',
           headers: {
-            'Authorization' : 'Bearer' + 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwianRpIjoiYzBmYWUxNjctM2VkMy00NDk5LWFmN2QtMDQ1ZjdiYTcyZTVjIiwidHlwZSI6ImFjY2VzcyIsImZyZXNoIjpmYWxzZSwiY3NyZiI6IiIsImlhdCI6MTc0MTM3ODgzOSwiZXhwIjoxNzQxNDE0ODM5LjIxNTgsInVzZXJfdHlwZSI6InN0YWZmIiwidXNlcl9pZCI6MiwidXNlcl9yb2xlIjoiV29ya2VyIn0.ScEZsQ1AYqpYikmClY4CkENr1CLLAlH6_kN0FP6CLEXmsh1RHoQUsN7o3_OcUFDYQRLg0Rg64HsXacgp2oe_4j88_gWT4ciFp-lpaq3kNQKgqkH9xQTIbErQX1eD4pU_m3fJh4SCZF6-zD3nVmeWgMZRUWgKMwqkhvHeYtVn9mzPtBexca651xDjm44pUjilyrYfgbAbd1iveD5qgLx9IlWt2rALjNLLYhMOa6-1A2rjuGhAIhO0K6jS4I1TipxoujhYaNg_BRQUvjo7P9ZEGqPZM-KWmMitVStxO5-4kgawnw31zxwtWMKDiNHqB3ZfkgBBkhDIijAmr7NRWpfFmw',
+            'Authorization' : 'Bearer ',
             'Content-Type': 'multipart/form-data'
           },
           data: formData
         };
-  
+        console.log(formData)
         axios.request(config)
         .then((response) => {
           console.log(JSON.stringify(response.data));
