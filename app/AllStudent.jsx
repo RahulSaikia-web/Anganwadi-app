@@ -1,25 +1,21 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
+
+async function storeGetValueFor(key) {
+  let result = await SecureStore.getItemAsync(key);
+  if (result) {
+    return result;
+  }
+}
+
 
 const AllStudent = () => {
+  const [studensList, setStudensList] = useState([]);
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
-
-  const [students, setStudents] = useState([
-    { id: '1', name: 'Rahul Sharma', phone: '9876543210', mother: 'Anita Sharma', father: 'Rajesh Sharma' },
-    { id: '2', name: 'Pooja Verma', phone: '9123456789', mother: 'Sunita Verma', father: 'Rakesh Verma' },
-    { id: '3', name: 'Amit Kumar', phone: '9988776655', mother: 'Geeta Kumar', father: 'Suresh Kumar' },
-    { id: '4', name: 'Sneha Reddy', phone: '9786543120', mother: 'Priya Reddy', father: 'Vikram Reddy' },
-    { id: '5', name: 'Vikas Singh', phone: '9345678123', mother: 'Kavita Singh', father: 'Amit Singh' },
-    { id: '6', name: 'Rohan Das', phone: '9012345678', mother: 'Meena Das', father: 'Ashok Das' },
-    { id: '7', name: 'Kiran Mehta', phone: '8567452301', mother: 'Alka Mehta', father: 'Suraj Mehta' },
-    { id: '8', name: 'Neha Joshi', phone: '7896541230', mother: 'Poonam Joshi', father: 'Vinod Joshi' },
-    { id: '9', name: 'Arjun Patel', phone: '7894561230', mother: 'Bhavna Patel', father: 'Ramesh Patel' },
-    { id: '10', name: 'Deepika Rao', phone: '7546983210', mother: 'Savita Rao', father: 'Shankar Rao' },
-  ]);
-
   const onRefresh = useCallback(() => {
     setRefreshing(true);
 
@@ -27,6 +23,39 @@ const AllStudent = () => {
       setRefreshing(false);
     }, 1500); 
   }, []);
+
+    useEffect(()=>{
+      getStudents()
+    },[])
+  
+    const getStudents = async ()=>{
+      let JWT_Token = await storeGetValueFor('JWT-Token');
+
+         const apiUrl = 'https://magicminute.online/api/v1/students/';
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${JWT_Token}`, // Add the token here
+            },
+          });
+    
+          if (response.ok) {
+            const data = await response.json();
+            setStudensList(data['data']);
+            console.log(studensList);
+            
+          } else {
+            console.log('Failed to fetch students');
+          }
+        } catch (error) {
+          console.error('Error fetching students:', error);
+        }
+      }
+    
+
+    
 
   return (
     <View style={styles.container}>
@@ -39,17 +68,17 @@ const AllStudent = () => {
       </View>
 
       <FlatList
-        data={students}
+        data={studensList}
         keyExtractor={(item) => item.id}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item, index }) => (
           <View style={styles.studentCard}>
             <Text style={styles.serialNumber}>{index + 1}.</Text>
             <View>
-              <Text style={styles.studentName}>{item.name}</Text>
-              <Text style={styles.details}>📞 {item.phone}</Text>
-              <Text style={styles.details}>👩‍👦 Mother: {item.mother}</Text>
-              <Text style={styles.details}>👨‍👦 Father: {item.father}</Text>
+              <Text style={styles.details}>👩‍👦 Mother: {item.student_name}</Text>
+              <Text style={styles.details}>📞 {item.student_phone}</Text>
+              <Text style={styles.details}>👩‍👦 Mother: {item.student_mother_name}</Text>
+              <Text style={styles.details}>👨‍👦 Father: {item.student_father_name}</Text>
             </View>
           </View>
         )}
