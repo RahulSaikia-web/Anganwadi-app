@@ -9,9 +9,8 @@ import { useNavigation } from '@react-navigation/native';  // Import useNavigati
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import * as FileSystem from 'expo-file-system';
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-
-DateTimePickerAndroid.open(AndroidNativeProps)
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {DateTimePicker, DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 
 async function storeGetValueFor(key) {
   let result = await SecureStore.getItemAsync(key);
@@ -23,12 +22,32 @@ async function storeGetValueFor(key) {
 const AddStudent = () => {
   const navigation = useNavigation();  // Initialize navigation hook
   const [image, setImage] = useState();
+  const [imageId, setImageId] = useState();
+  const [date, setDate] = useState(new Date(1598051730000));
 
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const [birthDate, setBirthDate] = useState('');
+  const onChange = async (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setDate(currentDate);
+    
+    saveDate(currentDate);
+  };
 
-  const showDatePicker = () => setDatePickerVisibility(true);
-  const hideDatePicker = () => setDatePickerVisibility(false);
+  const saveDate = (currentDate) => {
+    setForm({ ...form, 'student_dob': currentDate.toLocaleDateString('en-CA') });
+  }
+
+  const showMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: date,
+      onChange,
+      mode: currentMode,
+      is24Hour: false,
+    });
+  };
+
+  const showDatepicker = () => {
+    showMode('date');
+  };
 
   const apiUrl = 'https://magicminute.online/api';
   const [form, setForm] = useState({
@@ -39,7 +58,7 @@ const AddStudent = () => {
     student_father_name: '',
     student_phone: '',
     student_aadhar: '',
-    student_center_id: 0,
+    student_center_id: 1,
     student_image: '',
   });
 
@@ -95,12 +114,13 @@ const AddStudent = () => {
         uploadType: FileSystem.FileSystemUploadType.MULTIPART,
         headers : {
           Authorization: 'Bearer ' + JWT_Token,
+          Accept: 'application/json',
         }
       });
 
       if (response.status === 200)
       {
-        setForm({ ...form, [student_image]: value });
+        setForm({ ...form, "student_image": JSON.parse(response.body)});
       }
     } catch (error) {
       console.log(error);
@@ -113,12 +133,30 @@ const AddStudent = () => {
       return;
     }
 
+    if ( form.student_full_name.length < 5 || form.student_mother_name.length < 5 || form.student_father_name.length < 5)
+    {
+      Alert.alert('Error', 'All Names must be greater than 5 char!');
+      return;
+    }
+
+    if ( form.student_phone.length != 10)
+    {
+      Alert.alert('Error', 'Invalid phone');
+      return;
+    }
+
+    if ( form.student_aadhar.length != 12)
+    {
+      Alert.alert('Error', 'Invalid Aadhar');
+      return;
+    }
+
+    
     try {
 
         let JWT_Token = await storeGetValueFor('JWT-Token');
         let config = {
           method: 'post',
-          maxBodyLength: Infinity,
           url: apiUrl + '/v1/students/',
           headers: {
             Authorization: 'Bearer ' + JWT_Token,
@@ -126,7 +164,7 @@ const AddStudent = () => {
           },
           data: form,
         };
-        console.log(form);
+
         axios
           .request(config)
           .then((response) => {
@@ -153,13 +191,35 @@ const AddStudent = () => {
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
       </View>
+
       <View style={styles.container}>
+
+      
+      <Text style={styles.label}>
+          Photo <Text style={styles.required}>*</Text>
+        </Text>
+      <View style={styles.buttonContainer}>
+          <Button title="Pick Photo" onPress={() => loadImage('gallery')} />
+          <View style={styles.buttonSpacing} />
+          <Button title="Take Photo" onPress={() => loadImage()} />
+        </View>
+        {image && <Image source={{ uri: image.uri }} style={styles.image} />}
+
+        <Text style={styles.label}>
+        </Text>
         <Text style={styles.label}>
           Student Name <Text style={styles.required}>*</Text>
         </Text>
         <TextInput style={styles.input} maxLength={30} onChangeText={(value) => handleInputChange('student_full_name', value)} />
 
-        <RNDateTimePicker/>
+        <Text style={styles.label}>
+          Date of birth <Text style={styles.required}>*</Text>
+        </Text>
+        <SafeAreaView>
+            <TouchableOpacity onPress={showDatepicker} style={styles.input} >
+            <Text > {form.student_dob? form.student_dob: "YYYY-MM-DD" } </Text>
+          </TouchableOpacity>
+        </SafeAreaView>
 
         <Text style={styles.label}>
           Gender <Text style={styles.required}>*</Text>
@@ -189,17 +249,7 @@ const AddStudent = () => {
         <Text style={styles.label}>
           Aadhar Number <Text style={styles.required}>*</Text>
         </Text>
-        <TextInput style={styles.input} keyboardType="phone-pad" onChangeText={(value) => handleInputChange('student_aadhar', value)} />
-
-        <Text style={styles.label}>
-          Photo <Text style={styles.required}>*</Text>
-        </Text>
-        <View style={styles.buttonContainer}>
-          <Button title="Pick Photo" onPress={() => loadImage('gallery')} />
-          <View style={styles.buttonSpacing} />
-          <Button title="Take Photo" onPress={() => loadImage()} />
-        </View>
-        {image && <Image source={{ uri: image.uri }} style={styles.image} />}
+        <TextInput style={styles.input} buttonStyle={{ justifyContent: 'flex-end' }} keyboardType="phone-pad" onChangeText={(value) => handleInputChange('student_aadhar', value)} />
 
         <View style={styles.buttonSpacing} />
         <Button title="Submit" onPress={handleSubmit} color="#28a745" />
@@ -249,6 +299,9 @@ const styles = StyleSheet.create({
   },
   buttonSpacing: {
     height: 10,
+  },
+  dateInput: {
+    
   },
   input1: {
     padding: 10,
