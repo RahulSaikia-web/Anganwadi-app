@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput,Image, TouchableOpacity, StyleSheet, Alert, ImageBackground } from 'react-native';
+import { View, Text, TextInput,Image, TouchableOpacity, StyleSheet, Alert, ImageBackground,ActivityIndicator } from 'react-native';
 import background from '@/assets/images/lg-bg.jpg';
 import { useRouter } from 'expo-router';
 import { useAuth } from './context/AuthContext';
+import { SafeAreaView ,SafeAreaProvider} from 'react-native-safe-area-context';
 
 const SupervisorLogin = () => {
   const apiUrl = 'https://magicminute.online/api';
@@ -10,8 +11,10 @@ const SupervisorLogin = () => {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [midOrPassword, setMidOrPassword] = useState('');
+  const [isLoading, setisLoading] = useState(false)
 
   const handleLogin = async () => {
+    setisLoading(true);
     if (!email || !midOrPassword) {
       Alert.alert('Error', 'Please enter both Email and Password');
       return;
@@ -41,6 +44,7 @@ const SupervisorLogin = () => {
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again later.');
     }
+    setisLoading(false)
   };
 
   return (
@@ -48,6 +52,14 @@ const SupervisorLogin = () => {
       <View style={styles.container}>
        <View style={styles.imgCn}>
              <Image source={require('@/assets/images/app-icon.jpg')}style={styles.logo} />
+                {isLoading &&
+                   <SafeAreaProvider>
+                   <SafeAreaView style={[styles.load, styles.horizontal]}>
+                     <ActivityIndicator size="large" color="blue"/>
+                   </SafeAreaView>
+                 </SafeAreaProvider>
+             
+                 }
              </View>
         <Text style={styles.title}>Supervisor Login</Text>
         <TextInput
@@ -127,6 +139,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },load: {
+    flex: 1,
+    justifyContent: 'center',
+    zIndex:99,
+  },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
   },
 });
 
