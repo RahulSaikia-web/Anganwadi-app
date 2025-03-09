@@ -1,18 +1,45 @@
-import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
+
+async function storeGetValueFor(key) {
+  let result = await SecureStore.getItemAsync(key);
+  if (result) {
+    return result;
+  }
+}
+const API_URL = 'https://your-api-endpoint.com/ration'; // Replace with your API endpoint
 
 const Ration = () => {
+  
   const navigation = useNavigation();
   const [rationList, setRationList] = useState([{ item: '', quantity: '' }]);
-  const [rationDetails, setRationDetails] = useState({ restock_date: '', restock_details: '' });
   const [rationStockDataList, setRationStockDataList] = useState([]);
 
+  useEffect(() => {
+    fetchRationData();
+  }, []);
+
+  // Fetch stored ration data
+  const fetchRationData = async () => {
+    let JWT_Token = await storeGetValueFor('JWT-Token');
+    try {
+      const response = await fetch(API_URL, { method: 'GET' });
+      const data = await response.json();
+      setRationStockDataList(data.ration_entries || []);
+    } catch (error) {
+      console.error('Error fetching ration data:', error);
+    }
+  };
+
+  // Add new ration entry field
   const addRationField = () => {
     setRationList([...rationList, { item: '', quantity: '' }]);
   };
 
+  // Remove ration entry field
   const removeRationField = (index) => {
     if (rationList.length > 1) {
       const newRationList = rationList.filter((_, i) => i !== index);
@@ -20,9 +47,36 @@ const Ration = () => {
     }
   };
 
-  const saveRationStock = () => {
-    setRationStockDataList([...rationStockDataList, ...rationList]);
-    setRationList([{ item: '', quantity: '' }]); // Reset the input fields after saving
+  // Save ration data as a list of objects
+  const saveRationStock = async () => {
+    let JWT_Token = await storeGetValueFor('JWT-Token');
+    const filteredRationList = rationList.filter(
+      (ration) => ration.item.trim() !== '' && ration.quantity.trim() !== ''
+    );
+
+    if (filteredRationList.length === 0) {
+      Alert.alert('Error', 'Please enter at least one valid ration entry.');
+      return;
+    }
+    console.log(filteredRationList);
+    
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ration_entries: filteredRationList }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Ration saved successfully!');
+        fetchRationData();
+        setRationList([{ item: '', quantity: '' }]); 
+      } else {
+        Alert.alert('Error', 'Failed to save ration data.');
+      }
+    } catch (error) {
+      console.error('Error saving ration data:', error);
+    }
   };
 
   return (
@@ -69,7 +123,7 @@ const Ration = () => {
             )}
           </View>
         ))}
-        
+
         {/* Add More Button */}
         <TouchableOpacity onPress={addRationField} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
           <Ionicons name="add-circle" size={30} color="darkred" />
@@ -80,23 +134,6 @@ const Ration = () => {
         <TouchableOpacity onPress={saveRationStock} style={{ backgroundColor: 'darkred', padding: 10, borderRadius: 5, alignItems: 'center', marginBottom: 20 }}>
           <Text style={{ color: 'white', fontSize: 18 }}>Save Ration</Text>
         </TouchableOpacity>
-
-        {/* Ration Details
-        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Ration Details</Text>
-        <View style={{ backgroundColor: 'white', padding: 10, borderRadius: 10, elevation: 3, marginBottom: 20 }}>
-          <TextInput
-            placeholder="Restock Date"
-            style={{ borderBottomWidth: 1, borderColor: '#ccc', marginBottom: 10, fontSize: 16 }}
-            value={rationDetails.restock_date}
-            onChangeText={(text) => setRationDetails({ ...rationDetails, restock_date: text })}
-          />
-          <TextInput
-            placeholder="Restock Details"
-            style={{ borderBottomWidth: 1, borderColor: '#ccc', fontSize: 16 }}
-            value={rationDetails.restock_details}
-            onChangeText={(text) => setRationDetails({ ...rationDetails, restock_details: text })}
-          />
-        </View> */}
 
         {/* Ration History */}
         <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Ration History</Text>
