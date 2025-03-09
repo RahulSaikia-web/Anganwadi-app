@@ -22,7 +22,6 @@ async function storeGetValueFor(key) {
 const AddStudent = () => {
   const navigation = useNavigation();  // Initialize navigation hook
   const [image, setImage] = useState();
-  const [imageId, setImageId] = useState();
   const [date, setDate] = useState(new Date(1598051730000));
 
   const onChange = async (event, selectedDate) => {
@@ -42,6 +41,7 @@ const AddStudent = () => {
       onChange,
       mode: currentMode,
       is24Hour: false,
+      display: 'spinner'
     });
   };
 
@@ -58,7 +58,7 @@ const AddStudent = () => {
     student_father_name: '',
     student_phone: '',
     student_aadhar: '',
-    student_center_id: 1,
+    student_center_id: 99,
     student_image: '',
   });
 
@@ -75,14 +75,14 @@ const AddStudent = () => {
           mediaType: ['image'],
           allowsEditing: true,
           aspect: [1, 1],
-          quality: 1,
+          quality: .5,
         });
       } else {
         await ImagePicker.requestCameraPermissionsAsync();
         result = await ImagePicker.launchCameraAsync({
           allowsEditing: false,
           aspect: [1, 1],
-          quality: 1,
+          quality: .5,
         });
       }
 
@@ -105,6 +105,7 @@ const AddStudent = () => {
 
 
   const uploadImage = async (uri) =>{
+    // setForm({ ...form, "student_image": ''});
     console.log("Upload start")
     let JWT_Token = await storeGetValueFor('JWT-Token');
     try {
@@ -120,11 +121,14 @@ const AddStudent = () => {
 
       if (response.status === 200)
       {
+        console.log("response")
+        console.log(response.body)
         setForm({ ...form, "student_image": JSON.parse(response.body)});
       }
     } catch (error) {
       console.log(error);
     }
+    console.log("upload finish")
   }
 
   const handleSubmit = async () => {
