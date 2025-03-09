@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, Alert, StyleSheet, Image, ScrollView, TouchableOpacity , ActivityIndicator,Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import DatePicker from 'react-native-date-picker';
@@ -23,6 +23,7 @@ const AddStudent = () => {
   const navigation = useNavigation();  // Initialize navigation hook
   const [image, setImage] = useState();
   const [date, setDate] = useState(new Date(1598051730000));
+  const [uploadingForm , setuploadingForm] = useState(false)
 
   const onChange = async (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -131,60 +132,114 @@ const AddStudent = () => {
     console.log("upload finish")
   }
 
-  const handleSubmit = async () => {
-    if (Object.values(form).some((value) => !value)) {
-      Alert.alert('Error', 'All fields are required');
-      return;
-    }
+  // const handleSubmit = async () => {
+  //   setuploadingForm(true)
+  //   if (Object.values(form).some((value) => !value)) {
+  //     Alert.alert('Error', 'All fields are required');
+  //     return;
+  //   }
 
-    if ( form.student_full_name.length < 5 || form.student_mother_name.length < 5 || form.student_father_name.length < 5)
-    {
-      Alert.alert('Error', 'All Names must be greater than 5 char!');
-      return;
-    }
+  //   if ( form.student_full_name.length < 5 || form.student_mother_name.length < 5 || form.student_father_name.length < 5)
+  //   {
+  //     Alert.alert('Error', 'All Names must be greater than 5 char!');
+  //     return;
+  //   }
 
-    if ( form.student_phone.length != 10)
-    {
-      Alert.alert('Error', 'Invalid phone');
-      return;
-    }
+  //   if ( form.student_phone.length != 10)
+  //   {
+  //     Alert.alert('Error', 'Invalid phone');
+  //     return;
+  //   }
 
-    if ( form.student_aadhar.length != 12)
-    {
-      Alert.alert('Error', 'Invalid Aadhar');
-      return;
-    }
+  //   if ( form.student_aadhar.length != 12)
+  //   {
+  //     Alert.alert('Error', 'Invalid Aadhar');
+  //     return;
+  //   }
 
     
+  //   try {
+      
+
+  //       let JWT_Token = await storeGetValueFor('JWT-Token');
+  //       let config = {
+  //         method: 'post',
+  //         url: apiUrl + '/v1/students/',
+  //         headers: {
+  //           Authorization: 'Bearer ' + JWT_Token,
+  //           'Content-Type': 'application/json',
+  //         },
+  //         data: form,
+  //       };
+
+  //       axios
+  //         .request(config)
+  //         .then((response) => {
+  //           console.log(JSON.stringify(response.data));
+  //           Alert.alert('Success', 'Student added successfully!');
+  //         })
+  //         .catch((error) => {
+  //           Alert.alert('Error', 'Failed to add student nowww!');
+  //           console.log(error.response.data);
+  //         });
+
+  //   } catch (error) {
+  //     console.log(error);
+  //     Alert.alert('Error', 'Failed to add student here');
+  //   }
+  //   setuploadingForm(false)
+  // };
+  const handleSubmit = async () => {
+    setuploadingForm(true); // Show loading modal
+  
+    if (Object.values(form).some((value) => !value)) {
+      Alert.alert('Error', 'All fields are required', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
+      return;
+    }
+  
+    if (form.student_full_name.length < 5 || form.student_mother_name.length < 5 || form.student_father_name.length < 5) {
+      Alert.alert('Error', 'All Names must be greater than 5 char!', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
+      return;
+    }
+  
+    if (form.student_phone.length !== 10) {
+      Alert.alert('Error', 'Invalid phone', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
+      return;
+    }
+  
+    if (form.student_aadhar.length !== 12) {
+      Alert.alert('Error', 'Invalid Aadhar', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
+      return;
+    }
+  
     try {
-
-        let JWT_Token = await storeGetValueFor('JWT-Token');
-        let config = {
-          method: 'post',
-          url: apiUrl + '/v1/students/',
-          headers: {
-            Authorization: 'Bearer ' + JWT_Token,
-            'Content-Type': 'application/json',
-          },
-          data: form,
-        };
-
-        axios
-          .request(config)
-          .then((response) => {
-            console.log(JSON.stringify(response.data));
-            Alert.alert('Success', 'Student added successfully!');
-          })
-          .catch((error) => {
-            Alert.alert('Error', 'Failed to add student nowww!');
-            console.log(error.response.data);
-          });
-
+      let JWT_Token = await storeGetValueFor('JWT-Token');
+      let config = {
+        method: 'post',
+        url: apiUrl + '/v1/students/',
+        headers: {
+          Authorization: 'Bearer ' + JWT_Token,
+          'Content-Type': 'application/json',
+        },
+        data: form,
+      };
+  
+      const response = await axios.request(config);
+      console.log(JSON.stringify(response.data));
+  
+      Alert.alert('Success', 'Student added successfully!', [
+        { text: "OK", onPress: () => setuploadingForm(false) }
+      ]);
+  
     } catch (error) {
-      console.log(error);
-      Alert.alert('Error', 'Failed to add student here');
+      console.log(error.response?.data || error);
+  
+      Alert.alert('Error', 'Failed to add student!', [
+        { text: "OK", onPress: () => setuploadingForm(false) }
+      ]);
     }
   };
+  
 
   return (
     <ScrollView>
@@ -257,8 +312,18 @@ const AddStudent = () => {
 
         <View style={styles.buttonSpacing} />
         <Button title="Submit" onPress={handleSubmit} color="#28a745" />
+        <Modal animationType="fade" transparent={true} statusBarTranslucent={true} visible={uploadingForm}>
+            <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+            <ActivityIndicator size="large" color={'red'} />
+            <Text> Generating Face ID</Text>
+            </View>
+            </View>
+            </Modal>
       </View>
+
     </ScrollView>
+
   );
 };
 
@@ -323,6 +388,38 @@ const styles = StyleSheet.create({
   backButton: { flexDirection: 'row', alignItems: 'center' },
   backText: { color: 'white', fontSize: 18, marginLeft: 5 },
   navTitle: { fontSize: 20, color: 'darkred', fontWeight: 'bold', marginLeft: 15 },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center", alignItems: "center", backgroundColor: '#0008'
+    },
+    
+    
+    modalView: {
+    margin: 20,
+    width: 200,
+    height: 70,
+    backgroundColor: "white",
+    borderRadius: 5,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: "#000",
+    },
+    
+    
+    shadowOffset: { 
+    width: 0,
+    height: 2,
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    },
+    modalText: {
+    marginVertical: 15,
+    textAlign: "center",
+    fontSize: 17,
+    marginLeft: 15,
+    }
 });
 
 export default AddStudent;
