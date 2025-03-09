@@ -144,7 +144,7 @@ const OptionButton = ({ icon, text, onPress }) => (
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f8f8' },
-  profileSection: { flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: '#d32f2f' },
+  profileSection: { flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: 'darkred' },
   profileImage: { width: 50, height: 50, borderRadius: 25, marginRight: 15 },
   userName: { fontSize: 18, color: 'white', fontWeight: 'bold' },
   userLocation: { fontSize: 14, color: 'white' },
