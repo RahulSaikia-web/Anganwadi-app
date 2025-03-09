@@ -10,12 +10,12 @@ const AllHelpers = () => {
   const navigation = useNavigation();
 
   // Static Helper Data (For Now)
-  const [helpers, setHelpers] = useState([
-    { id: '1', name: 'Rahul Sharma', phone: '9876543210', aadhar: '1234-5678-9012' },
-    { id: '2', name: 'Priya Verma', phone: '8765432109', aadhar: '2345-6789-0123' },
-    { id: '3', name: 'Amit Kumar', phone: '7654321098', aadhar: '3456-7890-1234' },
-    { id: '4', name: 'Sneha Patel', phone: '6543210987', aadhar: '4567-8901-2345' },
-  ]);
+  // const [helpers, setHelpers] = useState([
+  //   { id: '1', name: 'Rahul Sharma', phone: '9876543210', aadhar: '1234-5678-9012' },
+  //   { id: '2', name: 'Priya Verma', phone: '8765432109', aadhar: '2345-6789-0123' },
+  //   { id: '3', name: 'Amit Kumar', phone: '7654321098', aadhar: '3456-7890-1234' },
+  //   { id: '4', name: 'Sneha Patel', phone: '6543210987', aadhar: '4567-8901-2345' },
+  // ]);
 
   const [refreshing, setRefreshing] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);

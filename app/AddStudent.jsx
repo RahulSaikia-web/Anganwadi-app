@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import DatePicker from 'react-native-date-picker';
 import axios from 'axios';
 import moment from 'moment';
-import { useNavigation } from '@react-navigation/native';  // Import useNavigation
+import { useNavigation,  } from '@react-navigation/native';  // Import useNavigation
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import * as FileSystem from 'expo-file-system';
@@ -88,8 +88,8 @@ const AddStudent = () => {
       }
 
       if (!result.canceled) {
-        await uploadImage(result.assets[0].uri)
         await saveImage(result.assets[0]);
+        await uploadImage(result.assets[0].uri)
       }
     } catch (error) {
       alert('Error loading image: ' + error);
@@ -126,6 +126,7 @@ const AddStudent = () => {
         console.log(response.body)
         setForm({ ...form, "student_image": JSON.parse(response.body)});
       }
+
     } catch (error) {
       console.log(error);
     }
@@ -193,21 +194,25 @@ const AddStudent = () => {
     setuploadingForm(true); // Show loading modal
   
     if (Object.values(form).some((value) => !value)) {
+      setuploadingForm(false);
       Alert.alert('Error', 'All fields are required', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
       return;
     }
   
     if (form.student_full_name.length < 5 || form.student_mother_name.length < 5 || form.student_father_name.length < 5) {
+      setuploadingForm(false);
       Alert.alert('Error', 'All Names must be greater than 5 char!', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
       return;
     }
   
     if (form.student_phone.length !== 10) {
+      setuploadingForm(false);
       Alert.alert('Error', 'Invalid phone', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
       return;
     }
   
     if (form.student_aadhar.length !== 12) {
+      setuploadingForm(false);
       Alert.alert('Error', 'Invalid Aadhar', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
       return;
     }
@@ -228,7 +233,7 @@ const AddStudent = () => {
       console.log(JSON.stringify(response.data));
   
       Alert.alert('Success', 'Student added successfully!', [
-        { text: "OK", onPress: () => setuploadingForm(false) }
+        { text: "OK", onPress: () => navigation.goBack() }
       ]);
   
     } catch (error) {
@@ -340,6 +345,10 @@ const styles = StyleSheet.create({
   },
   required: {
     color: 'red',
+  },
+
+ border: {
+    borderRadius:10
   },
   input: {
     borderWidth: 1,
