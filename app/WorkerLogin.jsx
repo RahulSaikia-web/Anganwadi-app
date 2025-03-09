@@ -87,9 +87,10 @@ const WorkerLogin = () => {
         />
         <TextInput
           style={styles.input}
-          placeholder="MID or Password"
+          placeholder="Enter Your PIN"
           placeholderTextColor="#888"
           secureTextEntry
+          keyboardType="phone-pad"
           value={midOrPassword}
           onChangeText={setMidOrPassword}
         />
