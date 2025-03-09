@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ImageBackground , Image} from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image } from 'react-native';
 import { useAuth } from './context/AuthContext';
 import React, { useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,19 +9,19 @@ const Index = () => {
   const { userRole } = useAuth();
   const router = useRouter();
 
-  // useEffect(() => {
-  //   if (userRole === 'supervisor') {
-  //     router.replace('/SupervisorHome');
-  //   } else if (userRole === 'worker') {
-  //     router.replace('/WorkerHome');
-  //   }
-  // }, [userRole]);
+  useEffect(() => {
+    if (userRole === 'officer') {
+      router.replace('/SupervisorHome');
+    } else if (userRole === 'staff') {
+      router.replace('/WorkerHome');
+    }
+  }, [userRole]);
 
   return (
     <View style={styles.container}>
       <ImageBackground source={background} style={styles.image} blurRadius={1}>
-      <View style={styles.imgCn}>
-      <Image source={require('@/assets/images/app-icon.jpg')}style={styles.logo} />
+        <View style={styles.imgCn}>
+          <Image source={require('@/assets/images/app-icon.jpg')} style={styles.logo} />
         </View>
 
         <View style={styles.contentContainer}>
@@ -49,41 +49,17 @@ const Index = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  image: {
-    flex: 1,
-    resizeMode: "cover",
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 20,
-  },
-  admin:{
-    padding:10,
-    borderRadius: 15,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  admintxt:{
-    color:"black"
-  },
-  logo:{
-    height:"100%",
-    width:"100%",
-    resizeMode:"cover",
-    borderRadius: 10,
-  },
+  container: { flex: 1 },
+  image: { flex: 1, resizeMode: "cover" },
+  contentContainer: { flex: 1, justifyContent: "center", alignItems: "center", gap: 20 },
+  logo: { height: "100%", width: "100%", resizeMode: "cover", borderRadius: 10 },
   loginBox: {
     width: 300,
     height: 200,
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(90, 19, 255, 0.94)", 
+    backgroundColor: "rgba(90, 19, 255, 0.94)",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -96,35 +72,16 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(19, 94, 255, 0.94)", 
+    backgroundColor: "rgba(19, 94, 255, 0.94)",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },
- 
-  imgCn:{
-    marginLeft:"10%",
-    height:200,
-    marginTop:"10%",
-    width:"80%",
-  },
-  innerBox: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)", 
-    borderRadius: 10,
-  },
-  loginText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 10, // Add spacing between icon and text
-  },
+  imgCn: { marginLeft: "10%", height: 200, marginTop: "10%", width: "80%" },
+  innerBox: { width: "100%", height: "100%", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(255, 255, 255, 0.2)", borderRadius: 10 },
+  loginText: { color: "white", fontSize: 20, fontWeight: "bold", textAlign: "center", marginTop: 10 },
 });
 
 export default Index;

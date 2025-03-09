@@ -74,9 +74,9 @@ const WorkerHome = () => {
             <FontAwesome5 name="calendar-check" size={24} color="white" />
             <Text style={styles.quickActionText}>Daily Tracking</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.quickActionCard} onPress={() => navigation.navigate('Ration')}>
-            <FontAwesome5 name="shopping-bag" size={24} color="white" />
-            <Text style={styles.quickActionText}>Ration</Text>
+          <TouchableOpacity style={styles.quickActionCard}>
+            <FontAwesome5 name="home" size={24} color="white" />
+            <Text style={styles.quickActionText}>Home Visits</Text>
           </TouchableOpacity>
         </View>
 
@@ -84,12 +84,12 @@ const WorkerHome = () => {
         <Text style={styles.actionCenterTitle}>Action Center</Text>
         <View style={styles.actionGrid}>
           <OptionButton icon="user-plus" text="Add Student" onPress={() => navigation.navigate('AddStudent')} />
-          <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
-          <OptionButton icon="users" text="All Student" onPress={() => navigation.navigate('AllStudent')} />
-          <OptionButton icon="users" text="All Staff" onPress={() => navigation.navigate('AllHelpers')} />
+          <OptionButton icon="users" text="All Helpers" onPress={() => navigation.navigate('AllHelpers')} />
           <OptionButton icon="user-plus" text="Add Helper" onPress={() => navigation.navigate('AddHelper')} />
           <OptionButton icon="user-check" text="Staff Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
-          <OptionButton icon="clipboard-list" text="All Attendance" onPress={() => navigation.navigate('Attendance')} />
+          <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
+          <OptionButton icon="users" text="All Student" onPress={() => navigation.navigate('AllStudent')} />
+          <OptionButton icon="clipboard-list" text="Attendance" onPress={() => navigation.navigate('Attendance')} />
           <OptionButton icon="shopping-bag" text="Ration" onPress={() => navigation.navigate('Ration')} />
           <OptionButton icon="cogs" text="Settings" onPress={() => navigation.navigate('Settings')} />
         </View>
@@ -146,7 +146,15 @@ const styles = StyleSheet.create({
   profileSection: { flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: 'darkred' },
   profileImage: { width: 50, height: 50, borderRadius: 25, marginRight: 15 },
   userName: { fontSize: 18, color: 'white', fontWeight: 'bold' },
-  userLocation: { fontSize: 14, color: 'white' },
+  userLocation: { fontSize: 14, color: 'white' },  // Modal Styles
+  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
+  modalContent: { width: '80%', backgroundColor: 'white', padding: 20, borderRadius: 10, alignItems: 'center' },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 10 },
+  detailLabel: { fontSize: 16, fontWeight: 'bold' },
+  detailValue: { fontSize: 16, color: '#333' },
+  closeButton: { marginTop: 10 },
+  closeText: { color: '#d32f2f', fontSize: 16, fontWeight: 'bold' },
   quickActions: { flexDirection: 'row', justifyContent: 'space-around', padding: 20 },
   quickActionCard: { backgroundColor: '#d32f2f', padding: 20, borderRadius: 10, alignItems: 'center', width: 100 },
   quickActionText: { color: 'white', marginTop: 10, fontSize: 14, textAlign: 'center' },
