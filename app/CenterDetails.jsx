@@ -1,40 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
+import * as SecureStore from 'expo-secure-store';
+
+async function storeGetValueFor(key) {
+  let result = await SecureStore.getItemAsync(key);
+  if (result) {
+    return result;
+  }
+}
 
 const CenterDetails = () => {
   const navigation = useNavigation();
+  const [Centerdata, setCenterData] = useState();
 
-  // Local Data (Replace with API data later)
-  const data = {
-    centerCode: "C12345",
-    centerName: "Bright Future Center",
-    address: "Golaght",
-  };
+   useEffect(()=>{
+        getStudents()
+      },[])
+    
+      const getStudents = async ()=>{
+        let JWT_Token = await storeGetValueFor('JWT-Token');
+  
+           const apiUrl = 'https://magicminute.online/api/v1/anganwadi/';
+          try {
+            const response = await fetch(apiUrl, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${JWT_Token}`, // Add the token here
+              },
+            });
+      
+            if (response.ok) {
+              const data = await response.json();
+              // console.log(data);
+              
+              setCenterData(data);              
+            } else {
+              console.log('Failed to fetch Center');
+            }
+          } catch (error) {
+            console.error('Error fetching Center:', error);
+          }
+        }
 
-  /*
-  // Uncomment this when using API
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchCenterDetails();
-  }, []);
-
-  const fetchCenterDetails = async () => {
-    try {
-      const response = await axios.get("https://api.example.com/center-details"); 
-      setData(response.data);
-    } catch (error) {
-      console.error("Error fetching center details:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  */
 
   return (
+    
     <View style={styles.container}>
       {/* Navbar */}
       <View style={styles.navbar}>
@@ -43,20 +56,22 @@ const CenterDetails = () => {
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Center Details */}
-      <View style={styles.content}>
+      {Centerdata && 
+ <View style={styles.content}>
         <View style={styles.card}>
           <Text style={styles.label}>Center Code:</Text>
-          <Text style={styles.value}>{data.centerCode}</Text>
+          <Text style={styles.value}>{Centerdata.center_code}</Text>
 
           <Text style={styles.label}>Center Name:</Text>
-          <Text style={styles.value}>{data.centerName}</Text>
+          <Text style={styles.value}>{Centerdata.center_name}</Text>
 
           <Text style={styles.label}>Address :</Text>
-          <Text style={styles.value}>{data.address}</Text>
+          <Text style={styles.value}>{Centerdata.center_address}</Text>
         </View>
-      </View>
+      </View> 
+
+      }
+         
     </View>
   );
 };
