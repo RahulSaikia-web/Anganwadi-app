@@ -94,21 +94,24 @@ const StudentAttendance = () => {
           Accept: 'application/json',
         }
       });
-
       if (response.status === 200)
       {
-        console.log("response")
-        
-        JSON.parse(response.body)
         Alert.alert('Success', 'Student Verified successfully!', [
           { text: "OK", onPress: () => navigation.goBack() }
         ]);
       }
-      console.log(response.body)
+      else if (response.status >= 400)
+      {
+        let resData = await JSON.parse(response.body);
+
+        Alert.alert('Error', resData.detail, [
+          { text: "Try Again!"}
+        ]);
+      }
+
     } catch (error) {
       console.log(error);
     }
-    console.log("upload finish")
   }
 
   const loadImage = async () => {
