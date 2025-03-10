@@ -3,8 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, 
   Modal, Button ,Alert
 } from 'react-native';
-import { useAuth } from './context/AuthContext';
-import { Link, useRouter } from 'expo-router';
+
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
@@ -17,16 +16,7 @@ async function storeGetValueFor(key) {
 }
 const WorkerHome = () => {
 
-  const { userRole } = useAuth();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (userRole === 'officer') {
-      router.replace('/SupervisorHome');
-    } else if (userRole === 'staff') {
-      router.replace('/WorkerHome');
-    }
-  }, [userRole]);
 
   const navigation = useNavigation();
   const [staffData,setstaffData] = useState()

@@ -6,16 +6,16 @@ import { useAuth } from './context/AuthContext';
 import { SafeAreaView ,SafeAreaProvider} from 'react-native-safe-area-context';
 
 const SupervisorLogin = () => {
-    const { userRole } = useAuth();
-    const router = useRouter();
+    // const { userRole } = useAuth();
+    // const router = useRouter();
   
-    useEffect(() => {
-      if (userRole === 'officer') {
-        router.replace('/SupervisorHome');
-      } else if (userRole === 'Worker') {
-        router.replace('/WorkerHome');
-      }
-    }, [userRole]);
+    // useEffect(() => {
+    //   if (userRole === 'officer') {
+    //     router.replace('/SupervisorHome');
+    //   } else if (userRole === 'Worker') {
+    //     router.replace('/WorkerHome');
+    //   }
+    // }, [userRole]);
   const apiUrl = 'https://magicminute.online/api';
   const { login } = useAuth();
   const [email, setEmail] = useState('');
