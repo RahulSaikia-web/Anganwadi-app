@@ -16,7 +16,7 @@ const AllStudent = () => {
   const [studentsList, setStudentsList] = useState([]);
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Loader state
+  const [isLoading, setIsLoading] = useState(true); 
 
   useEffect(() => {
     getStudents();
@@ -24,11 +24,11 @@ const AllStudent = () => {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    getStudents(); // Refresh the list
+    getStudents(); 
   }, []);
 
   const getStudents = async () => {
-    setIsLoading(true); // Show loader while fetching
+    setIsLoading(true); 
     let JWT_Token = await storeGetValueFor('JWT-Token');
     const apiUrl = 'https://magicminute.online/api/v1/students/';
 
@@ -50,7 +50,7 @@ const AllStudent = () => {
     } catch (error) {
       console.error('Error fetching students:', error);
     } finally {
-      setIsLoading(false); // Hide loader after fetching
+      setIsLoading(false); 
       setRefreshing(false);
     }
   };
@@ -64,6 +64,7 @@ const AllStudent = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="white" />
           <Text style={styles.backText}>Back</Text>
+          <Text style={styles.headingText}>All Students</Text>
         </TouchableOpacity>
       </View>
 
@@ -80,18 +81,14 @@ const AllStudent = () => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           renderItem={({ item, index }) => (
             <View style={styles.studentCard}>
-              {/* Serial Number (Left) */}
               <Text style={styles.serialNumber}>{index + 1}.</Text>
 
-              {/* Student Info (Image & Details in One Row) */}
               <View style={styles.studentInfo}>
-                {/* Student Image (Left of Text) */}
                 <Image
                   source={item.student_image ? { uri: `${imgUrl}${item.student_image}` } : require('@/assets/images/profile.webp')}
                   style={styles.studentImage}
                 />
 
-                {/* Student Details (Right of Image) */}
                 <View style={styles.textContainer}>
                   <Text style={styles.studentName}>{item.student_full_name}</Text>
                   <Text style={styles.details}>📞 {item.student_phone}</Text>
@@ -130,6 +127,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 5,
   },
+  headingText:{
+    fontSize:18,
+    color:'#fafafa',
+    marginLeft:"20%",
+    fontWeight:'bold'
+  },
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -157,18 +160,18 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   studentInfo: {
-    flexDirection: 'row', // Aligns image & text horizontally
-    alignItems: 'center', // Keeps them centered in the row
+    flexDirection: 'row', 
+    alignItems: 'center', 
     flex: 1,
   },
   studentImage: {
     width: 50,
     height: 50,
-    borderRadius: 25, // Make it a perfect circle
+    borderRadius: 25, 
     marginRight: 10,
   },
   textContainer: {
-    flex: 1, // Makes sure text fills remaining space
+    flex: 1, 
   },
   studentName: {
     fontSize: 16,

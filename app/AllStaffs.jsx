@@ -64,6 +64,7 @@ const AllStaffs = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="white" />
           <Text style={styles.backText}>Back</Text>
+          <Text style={styles.headingText}>All Staffs</Text>
         </TouchableOpacity>
       </View>
 
@@ -95,7 +96,7 @@ const AllStaffs = () => {
                 <View style={styles.textContainer}>
                   <Text style={styles.staffName}>{item.staff_full_name}</Text>
                   <Text style={styles.details}>📞 {item.staff_phone}</Text>
-                  <Text style={styles.details}>🛠 Role: {item.staff_role}</Text>
+                  <Text style={styles.details}>🤵🏻 Role: {item.staff_role}</Text>
                 </View>
               </View>
             </View>
@@ -148,6 +149,12 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     elevation: 3,
+  },
+  headingText:{
+    fontSize:18,
+    color:'#fafafa',
+    marginLeft:"20%",
+    fontWeight:'bold'
   },
   serialNumber: {
     fontSize: 20,

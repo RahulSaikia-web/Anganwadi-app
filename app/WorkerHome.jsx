@@ -115,7 +115,7 @@ const WorkerHome = () => {
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>User Details</Text>
+            <Text style={styles.modalTitle}>Details</Text>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Name:</Text>
               <Text style={styles.detailValue}>{staffData ? staffData.staff_full_name : "Name"}</Text>
