@@ -127,7 +127,7 @@ const StudentAttendance = () => {
           <Text style={styles.headingText}>Students Attendence</Text>
         </TouchableOpacity>
       </View>
-
+      <Text style={styles.date}>Today Date : {getCurrentDate()}</Text>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="darkred" />
@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
   backButton: { flexDirection: 'row', alignItems: 'center' },
   backText: { color: 'white', fontSize: 18, marginLeft: 5 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  date:{color:"green", fontSize:16,marginLeft:"20%",marginTop:30,fontWeight:"bold"},
   loadingText: { marginTop: 10, fontSize: 16, color: 'darkred' },
   studentCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', padding: 15, borderRadius: 10, marginVertical: 8 },
   serialNumber: { fontSize: 18, fontWeight: 'bold', marginRight: 10 },

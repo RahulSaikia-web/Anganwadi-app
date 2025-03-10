@@ -58,7 +58,7 @@ const SelfAttendance = () => {
         const data = await response.json();
         setstaffList(data['data']);
       } else {
-        Alert.alert('Error', 'Failed to fetch students');
+        Alert.alert('Error', 'Failed to fetch Staff');
       }
     } catch (error) {
       Alert.alert('Network Error', 'Please check your internet connection.');
@@ -129,6 +129,7 @@ const SelfAttendance = () => {
         </TouchableOpacity>
       </View>
 
+      <Text style={styles.date}>Today Date : {getCurrentDate()}</Text>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="darkred" />
@@ -185,6 +186,7 @@ const styles = StyleSheet.create({
   studentDetails: { fontSize: 16, color: '#555', marginBottom: 5 },
   present: { color: 'green', fontWeight: 'bold' },
   absent: { color: 'red', fontWeight: 'bold' },
+  date:{color:"green", fontSize:16,marginLeft:"20%",marginTop:30,fontWeight:"bold"},
   submitButton: { backgroundColor: '#007bff', padding: 12, borderRadius: 8, alignItems: 'center', marginTop: 5, width: 120 },
   buttonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
   headingText:{
