@@ -1,17 +1,84 @@
-import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, RefreshControl, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Function to get JWT Token securely
+async function storeGetValueFor(key) {
+  let result = await SecureStore.getItemAsync(key);
+  return result || null;
+}
 
 const StudentAttendance = () => {
-  const [image, setImage] = useState(null);
+  const [studentsList, setStudentsList] = useState([]);
+  const [attendanceData, setAttendanceData] = useState({});
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
 
-  const takePhoto = async () => {
+  // Fetch students when component mounts
+  useEffect(() => {
+    getStudents();
+    checkAttendanceDate();
+  }, []);
+
+  // Refresh function
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      getStudents();
+      setRefreshing(false);
+    }, 1500);
+  }, []);
+
+  // Check and reset attendance if the date has changed
+  const checkAttendanceDate = async () => {
+    const storedDate = await AsyncStorage.getItem('attendanceDate');
+    const today = getCurrentDate();
+
+    if (storedDate !== today) {
+      await AsyncStorage.setItem('attendanceDate', today);
+      setAttendanceData({});
+    }
+  };
+
+  // Get students from API
+  const getStudents = async () => {
+    let JWT_Token = await storeGetValueFor('JWT-Token');
+    if (!JWT_Token) {
+      Alert.alert('Error', 'Authentication token not found');
+      return;
+    }
+
+    const apiUrl = 'https://magicminute.online/api/v1/students/';
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${JWT_Token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStudentsList(data['data']);
+      } else {
+        Alert.alert('Error', 'Failed to fetch students');
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      Alert.alert('Network Error', 'Please check your internet connection.');
+    }
+  };
+
+  // Capture photo for attendance
+  const takePhoto = async (studentId) => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      alert('Camera permission is required to take attendance photo');
+      Alert.alert('Permission Required', 'Camera permission is required to take attendance photo.');
       return;
     }
 
@@ -22,40 +89,59 @@ const StudentAttendance = () => {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setAttendanceData((prevData) => ({
+        ...prevData,
+        [studentId]: { image: result.assets[0].uri, status: 'Submit' },
+      }));
     }
   };
 
-  const submitAttendance = async () => {
-    if (!image) {
-      alert('Please take a photo first');
+  // Get current date
+  const getCurrentDate = () => new Date().toISOString().split('T')[0];
+
+  // Submit attendance
+  const submitAttendance = async (studentId) => {
+    let JWT_Token = await storeGetValueFor('JWT-Token');
+    if (!JWT_Token) {
+      Alert.alert('Error', 'Authentication token not found');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('image', {
-      uri: image,
-      name: 'attendance.jpg',
-      type: 'image/jpeg',
-    });
+    const apiUrl = 'https://magicminute.online/api/v1/attendance/submit';
 
     try {
-      const response = await fetch('API_ENDPOINT_HERE', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        body: formData,
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${JWT_Token}`,
         },
+        body: JSON.stringify({
+          student_id: studentId,
+          status: 'Present', // Adjust as needed
+        }),
       });
-      const result = await response.json();
-      alert(result.message || 'Attendance submitted successfully');
+
+      const responseData = await response.json();
+      console.log('Response:', responseData);
+
+      if (response.ok) {
+        setAttendanceData((prevData) => ({
+          ...prevData,
+          [studentId]: { ...prevData[studentId], status: 'Present' },
+        }));
+        Alert.alert('Success', 'Attendance submitted successfully!');
+      } else {
+        Alert.alert('Error', responseData.message || 'Failed to submit attendance');
+      }
     } catch (error) {
-      alert('Failed to submit attendance');
+      console.error('Error submitting attendance:', error);
+      Alert.alert('Network Error', 'Please check your internet connection.');
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeContainer}>
+    <View style={styles.container}>
       {/* Navbar */}
       <View style={styles.navBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -64,53 +150,79 @@ const StudentAttendance = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Instructions Section - Moved to the Top */}
-        <View style={styles.instructionsContainer}>
-          <Text style={styles.instructionsTitle}>How It Works:</Text>
-          <Text style={styles.instruction}>• Tap "📸 Capture Attendance" to take a photo.</Text>
-          <Text style={styles.instruction}>• Ensure your face is clearly visible in the photo.</Text>
-          <Text style={styles.instruction}>• Tap "Submit" to mark your attendance.</Text>
-          <Text style={styles.instruction}>• Wait for a confirmation message.</Text>
-        </View>
+      {/* Student List */}
+      <FlatList
+        data={studentsList}
+        keyExtractor={(item) => item.student_id.toString()}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        renderItem={({ item, index }) => {
+          const studentStatus = attendanceData[item.student_id]?.status || 'Attendance';
 
-        {/* Main Content */}
-        <View style={styles.container}>
-          <Text style={styles.title}>Student Attendance</Text>
+          return (
+            <View style={styles.studentCard}>
+              <Text style={styles.serialNumber}>{index + 1}.</Text>
+              <View>
+                <Text style={styles.details}>👩‍👦 Student: {item.student_full_name}</Text>
+                <Text style={styles.details}>📞 Phone: {item.student_phone}</Text>
+                <Text style={styles.details}>👩‍👦 Mother: {item.student_mother_name}</Text>
+                <Text style={styles.details}>👨‍👦 Father: {item.student_father_name}</Text>
+                <Text style={styles.dateText}>📅 Today: {getCurrentDate()}</Text>
 
-          {/* Image Preview */}
-          <View style={styles.imageContainer}>
-            {image ? (
-              <Image source={{ uri: image }} style={styles.image} />
-            ) : (
-              <Text style={styles.placeholderText}>Click Capture Attendance Button</Text>
-            )}
-          </View>
-
-          <TouchableOpacity style={styles.captureButton} onPress={takePhoto}>
-            <Text style={styles.buttonText}>📸 Capture Attendance</Text>
-          </TouchableOpacity>
-
-          {image && (
-            <TouchableOpacity style={styles.submitButton} onPress={submitAttendance}>
-              <Text style={styles.buttonText}>✅ Submit</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+                {studentStatus === 'Attendance' ? (
+                  <TouchableOpacity
+                    style={styles.captureButton}
+                    onPress={() => takePhoto(item.student_id)}
+                  >
+                    <Text style={styles.buttonText}>Take Photo</Text>
+                  </TouchableOpacity>
+                ) : studentStatus === 'Submit' ? (
+                  <TouchableOpacity
+                    style={styles.submitButton}
+                    onPress={() => submitAttendance(item.student_id)}
+                  >
+                    <Text style={styles.buttonText}>Submit</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <Text>Status: <Text style={styles.status}>{studentStatus}</Text></Text>
+                )}
+              </View>
+            </View>
+          );
+        }}
+      />
+    </View>
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
-  safeContainer: {
+  container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f5f5f5',
   },
-  scrollContainer: {
-    flexGrow: 1,
+  captureButton: {
+    backgroundColor: 'lightgreen',
+    margin: 10,
+    padding: 10,
+    width: 100,
+    borderRadius: 10,
     alignItems: 'center',
-    padding: 20,
+  },
+  submitButton: {
+    backgroundColor: 'orange',
+    margin: 10,
+    padding: 10,
+    width: 100,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  status: {
+    color: 'darkgreen',
+    fontWeight: 'bold',
   },
   navBar: {
     width: '100%',
@@ -130,87 +242,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 5,
   },
-  instructionsContainer: {
-    width: '100%',
+  studentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    marginHorizontal: 15,
+    marginVertical: 8,
     padding: 15,
-    backgroundColor: '#f8f9fa',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderRadius: 10,
+    elevation: 3,
   },
-  instructionsTitle: {
+  serialNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
-    color: '#444',
-    textAlign: 'center',
+    marginRight: 15,
+    color: '#d32f2f',
   },
-  instruction: {
-    fontSize: 16,
+  details: {
+    fontSize: 14,
     color: '#555',
-    marginBottom: 3,
-    textAlign: 'center',
-  },
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginVertical: 20,
-    color: 'black',
-  },
-  captureButton: {
-    backgroundColor: '#007bff',
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 10,
-    width: '80%',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  submitButton: {
-    backgroundColor: '#28a745',
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 10,
-    width: '80%',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  imageContainer: {
-    width: 350,
-    height: 300,
-    borderWidth: 2,
-    borderColor: '#ced4da',
-    backgroundColor: '#e9ecef',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 10,
-    borderRadius: 10,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 10,
-  },
-  placeholderText: {
-    color: '#000000',
-    textAlign: 'center',
-    paddingHorizontal: 10,
+    marginTop: 2,
   },
 });
 
