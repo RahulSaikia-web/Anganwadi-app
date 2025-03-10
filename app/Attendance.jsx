@@ -1,13 +1,53 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, TextInput, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
+
+async function storeGetValueFor(key) {
+  let result = await SecureStore.getItemAsync(key);
+  if (result) {
+    return result;
+  }
+}
+
 
 const Attendance = () => {
   const navigation = useNavigation();
   const [filter, setFilter] = useState('today');
   const [customDate, setCustomDate] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    getStudentsAttendance();
+  }, []);
+
+  const getStudentsAttendance = async () => {
+    console.log("got data");
+
+    try {
+      let JWT_Token = await storeGetValueFor('JWT-Token');
+      const apiUrl = 'https://magicminute.online/api/v1/attendance/students/';
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${JWT_Token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.data);/// attendane data
+        
+      } else {
+        console.log('Failed to fetch students');
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+    } finally {
+    }
+  }
 
   const filters = [
     { label: 'Today', value: 'today' },
@@ -54,6 +94,9 @@ const Attendance = () => {
   };
 
   const filteredData = filterAttendance();
+
+
+
 
   return (
     <View style={styles.container}>
