@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   headingText:{
     fontSize:18,
     color:'#fafafa',
-    marginLeft:"10%",
+    marginLeft:"20%",
     fontWeight:'bold'
   },
   loaderContainer: {

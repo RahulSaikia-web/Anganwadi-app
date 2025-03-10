@@ -69,7 +69,7 @@ const SupervisorHome = () => {
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
-          <QuickAction icon="clipboard-list" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
+          <QuickAction icon="clipboard-list" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendenceSupervisor')} />
           <QuickAction icon="clipboard-list" text="Staff Attendance" onPress={() => navigation.navigate('StaffAttendance')} />
           <QuickAction icon="shopping-bag" text="Ration History" onPress={() => navigation.navigate('RationHistory')} />
         </View>

@@ -96,7 +96,7 @@ const AllStaffs = () => {
                 <View style={styles.textContainer}>
                   <Text style={styles.staffName}>{item.staff_full_name}</Text>
                   <Text style={styles.details}>📞 {item.staff_phone}</Text>
-                  <Text style={styles.details}>🛠 Role: {item.staff_role}</Text>
+                  <Text style={styles.details}>🤵🏻 Role: {item.staff_role}</Text>
                 </View>
               </View>
             </View>
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   headingText:{
     fontSize:18,
     color:'#fafafa',
-    marginLeft:"10%",
+    marginLeft:"20%",
     fontWeight:'bold'
   },
   serialNumber: {
