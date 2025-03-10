@@ -1,4 +1,4 @@
-import React, { useState , useEffect} from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput,Image, TouchableOpacity, StyleSheet, Alert, ImageBackground , ActivityIndicator} from 'react-native';
 import background from '@/assets/images/lg-bg.jpg';
 import { useRouter } from 'expo-router';
@@ -14,20 +14,10 @@ async function storeSave(key, value) {
 
 
 const WorkerLogin = () => {
-  const { userRole } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (userRole === 'supervisor') {
-      router.replace('/SupervisorHome');
-    } else if (userRole === 'worker') {
-      router.replace('/WorkerHome');
-    }
-  }, [userRole]);
 
 
   const apiUrl = 'https://magicminute.online/api';
-  
+  const router = useRouter();
   const { login } = useAuth();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [midOrPassword, setMidOrPassword] = useState('');

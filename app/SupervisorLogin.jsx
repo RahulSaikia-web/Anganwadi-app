@@ -4,10 +4,18 @@ import background from '@/assets/images/lg-bg.jpg';
 import { useRouter } from 'expo-router';
 import { useAuth } from './context/AuthContext';
 import { SafeAreaView ,SafeAreaProvider} from 'react-native-safe-area-context';
+import * as SecureStore from 'expo-secure-store';
+
+async function storeSave(key, value) {
+  await SecureStore.setItemAsync(key, value);
+}
+
+
+
 
 const SupervisorLogin = () => {
     // const { userRole } = useAuth();
-    // const router = useRouter();
+    const router = useRouter();
   
     // useEffect(() => {
     //   if (userRole === 'officer') {
@@ -44,14 +52,19 @@ const SupervisorLogin = () => {
       });
 
       const data = await response.json();
+      console.log(data);
+      
       if (response.ok) {
         await login('supervisor'); 
+        await storeSave("JWT-Token", data.access_token)
         router.replace('/SupervisorHome'); 
       } else {
         Alert.alert('Error', data.message || 'Login failed');
       }
     } catch (error) {
-      Alert.alert('Error', 'Something went wrong. Please try again later.');
+      Alert.alert('Error', 'Something went wrong. Please try again later .');
+      console.log(error);
+      
     }
     setisLoading(false)
   };

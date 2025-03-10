@@ -97,19 +97,19 @@ const WorkerHome = () => {
       <View style={styles.actionGrid}>
         
         <OptionButton icon="users" text="All Student" onPress={() => navigation.navigate('AllStudent')} />
-        <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
         <OptionButton icon="user-plus" text="Add Student" onPress={() => navigation.navigate('AddStudent')} />
+        <OptionButton icon="user-plus" text="Add Helper" onPress={() => navigation.navigate('AddHelper')} />
+        <OptionButton icon="user-plus" text="Add Beneficiaries" onPress={() => navigation.navigate('AddBeneficiaries')} />
+        <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
+        <OptionButton icon="user-check" text="Staff Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
+        <OptionButton icon="clipboard-list" text="Attendance" onPress={() => navigation.navigate('Attendance')} />
         
         <OptionButton icon="users" text="All Staffs" onPress={() => navigation.navigate('AllStaffs')} />
-        <OptionButton icon="user-check" text="Staff Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
-        <OptionButton icon="user-plus" text="Add Helper" onPress={() => navigation.navigate('AddHelper')} />
         
-        <OptionButton icon="clipboard-list" text="Attendance" onPress={() => navigation.navigate('Attendance')} />
         <OptionButton icon="school" text="Center Details" onPress={() => navigation.navigate('CenterDetails')} />
         <OptionButton icon="shopping-bag" text="Ration" onPress={() => navigation.navigate('Ration')} />
         <OptionButton icon="home" text="Home Visit" onPress={() => navigation.navigate('HomeVisit')} />
         <OptionButton icon="cogs" text="Settings" onPress={() => navigation.navigate('Settings')} />
-        <OptionButton icon="user-plus" text="Add Beneficiaries" onPress={() => navigation.navigate('AddBeneficiaries')} />
       </View>
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
               <Ionicons name="log-out-outline" size={20} color="white" />
