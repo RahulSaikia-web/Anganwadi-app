@@ -13,7 +13,7 @@ async function storeGetValueFor(key) {
 
 
 const AllStaffs = () => {
-  const [studensList, setStudensList] = useState([]);
+  const [staffsList, setStaffsList] = useState([]);
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(() => {
@@ -25,13 +25,13 @@ const AllStaffs = () => {
   }, []);
 
     useEffect(()=>{
-      getStudents()
+      getStaffs()
     },[])
   
-    const getStudents = async ()=>{
+    const getStaffs = async ()=>{
       let JWT_Token = await storeGetValueFor('JWT-Token');
 
-         const apiUrl = 'https://magicminute.online/api/v1/students/';
+         const apiUrl = 'https://magicminute.online/api/v1/staffs/';
         try {
           const response = await fetch(apiUrl, {
             method: 'GET',
@@ -43,14 +43,13 @@ const AllStaffs = () => {
     
           if (response.ok) {
             const data = await response.json();
-            setStudensList(data['data']);
-            console.log(studensList);
-            
+            setStaffsList(data['data']);
           } else {
-            console.log('Failed to fetch students');
+            console.log(response)
+            console.log('Failed to fetch Staffs');
           }
         } catch (error) {
-          console.error('Error fetching students:', error);
+          console.error('Error fetching Staffs:', error);
         }
       }
     
@@ -68,17 +67,16 @@ const AllStaffs = () => {
       </View>
 
       <FlatList
-        data={studensList}
-        keyExtractor={(item) => item.id ? item.student_id.toString() : `${item.student_phone}`}
+        data={staffsList}
+        keyExtractor={(item) => item.id ? item.staff_id.toString() : `${item.staff_phone}`}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item, index }) => (
-          <View style={styles.studentCard}>
+          <View style={styles.staffCard}>
             <Text style={styles.serialNumber}>{index + 1}.</Text>
             <View>
-              <Text style={styles.details}>👩‍👦 Student : {item.student_full_name}</Text>
-              <Text style={styles.details}>📞Phone : {item.student_phone}</Text>
-              <Text style={styles.details}>👩‍👦 Mother: {item.student_mother_name}</Text>
-              <Text style={styles.details}>👨‍👦 Father: {item.student_father_name}</Text>
+              <Text style={styles.details}>👩‍👦 Name : {item.staff_full_name}</Text>
+              <Text style={styles.details}>📞Phone : {item.staff_phone}</Text>
+              <Text style={styles.details}> Role : {item.staff_role}</Text>
             </View>
           </View>
         )}
@@ -110,7 +108,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 5,
   },
-  studentCard: {
+  staffCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'white',
