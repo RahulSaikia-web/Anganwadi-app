@@ -6,16 +6,6 @@ import background from '@/assets/images/lg-bg.jpg';
 import { Link, useRouter } from 'expo-router';
 
 const Index = () => {
-  const { userRole } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (userRole === 'supervisor') {
-      router.replace('/SupervisorHome');
-    } else if (userRole === 'worker') {
-      router.replace('/WorkerHome');
-    }
-  }, [userRole]);
 
   return (
     <View style={styles.container}>

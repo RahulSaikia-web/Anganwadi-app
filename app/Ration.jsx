@@ -63,7 +63,6 @@ const Ration = () => {
       }
 
       const data = await response.json();
-      console.log('Ration history data:', data.data);
       setRationHistoryList(data.data.reverse() || []);
     } catch (error) {
       console.error('Error fetching ration data:', error);
