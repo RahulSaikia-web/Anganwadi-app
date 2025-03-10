@@ -3,8 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, 
   Modal, Button ,Alert
 } from 'react-native';
-import { useAuth } from './context/AuthContext';
-import { Link, useRouter } from 'expo-router';
+
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
@@ -17,16 +16,7 @@ async function storeGetValueFor(key) {
 }
 const WorkerHome = () => {
 
-  const { userRole } = useAuth();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (userRole === 'officer') {
-      router.replace('/SupervisorHome');
-    } else if (userRole === 'staff') {
-      router.replace('/WorkerHome');
-    }
-  }, [userRole]);
 
   const navigation = useNavigation();
   const [staffData,setstaffData] = useState()
@@ -107,19 +97,19 @@ const WorkerHome = () => {
       <View style={styles.actionGrid}>
         
         <OptionButton icon="users" text="All Student" onPress={() => navigation.navigate('AllStudent')} />
-        <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
         <OptionButton icon="user-plus" text="Add Student" onPress={() => navigation.navigate('AddStudent')} />
+        <OptionButton icon="user-plus" text="Add Helper" onPress={() => navigation.navigate('AddHelper')} />
+        <OptionButton icon="user-plus" text="Add Beneficiaries" onPress={() => navigation.navigate('AddBeneficiaries')} />
+        <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
+        <OptionButton icon="user-check" text="Staff Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
+        <OptionButton icon="clipboard-list" text="Attendance" onPress={() => navigation.navigate('Attendance')} />
         
         <OptionButton icon="users" text="All Staffs" onPress={() => navigation.navigate('AllStaffs')} />
-        <OptionButton icon="user-check" text="Staff Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
-        <OptionButton icon="user-plus" text="Add Helper" onPress={() => navigation.navigate('AddHelper')} />
         
-        <OptionButton icon="clipboard-list" text="Attendance" onPress={() => navigation.navigate('Attendance')} />
         <OptionButton icon="school" text="Center Details" onPress={() => navigation.navigate('CenterDetails')} />
         <OptionButton icon="shopping-bag" text="Ration" onPress={() => navigation.navigate('Ration')} />
         <OptionButton icon="home" text="Home Visit" onPress={() => navigation.navigate('HomeVisit')} />
         <OptionButton icon="cogs" text="Settings" onPress={() => navigation.navigate('Settings')} />
-        <OptionButton icon="user-plus" text="Add Beneficiaries" onPress={() => navigation.navigate('AddBeneficiaries')} />
       </View>
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
               <Ionicons name="log-out-outline" size={20} color="white" />

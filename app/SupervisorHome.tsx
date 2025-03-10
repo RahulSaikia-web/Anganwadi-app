@@ -7,9 +7,11 @@ import { useNavigation } from '@react-navigation/native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 
-async function getStoredToken(key) {
-  let token = await SecureStore.getItemAsync(key);
-  return token ? token : null;
+async function storeGetValueFor(key) {
+  let result = await SecureStore.getItemAsync(key);
+  if (result) {
+    return result;
+  }
 }
 
 const SupervisorHome = () => {
@@ -22,8 +24,8 @@ const SupervisorHome = () => {
   }, []);
 
   const fetchSupervisorDetails = async () => {
-    let JWT_Token = await getStoredToken('JWT-Token');
-    const apiUrl = 'https://magicminute.online/api/v1/anganwadi/';
+    let JWT_Token = await storeGetValueFor('JWT-Token');
+    const apiUrl = 'https://magicminute.online/api/v1/officers/self/';
     
     try {
       const response = await fetch(apiUrl, {
@@ -33,11 +35,10 @@ const SupervisorHome = () => {
           'Authorization': `Bearer ${JWT_Token}`,
         },
       });
-      let data = await response.json()
-      console.log(data);
+
       
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json();   
         setSupervisorData(data);
       } else {
         console.error('Failed to fetch supervisor details');
@@ -62,8 +63,8 @@ const SupervisorHome = () => {
         <TouchableOpacity style={styles.profileSection} onPress={() => setModalVisible(true)}>
           <Image source={require('@/assets/images/profile.webp')} style={styles.profileImage} />
           <View>
-            <Text style={styles.userName}>{supervisorData ? supervisorData.officer_full_name : "Name"}</Text>
-            <Text style={styles.userLocation}>{supervisorData ? supervisorData.officer_phone : "0000000000"}</Text>
+            <Text style={styles.userName}>{supervisorData ? supervisorData.officer_full_name : "Name"} - {supervisorData ? supervisorData.officer_role : "Role"} </Text>
+            <Text style={styles.userLocation}>email : {supervisorData ? supervisorData.officer_email  : "0000000000"}</Text>
           </View>
         </TouchableOpacity>
 
@@ -102,12 +103,16 @@ const SupervisorHome = () => {
               <Text style={styles.detailValue}>{supervisorData ? supervisorData.officer_full_name : "Name"}</Text>
             </View>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Phone:</Text>
+              <Text style={styles.detailLabel}>Number:</Text>
               <Text style={styles.detailValue}>{supervisorData ? supervisorData.officer_email : "0000000000"}</Text>
             </View>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Role:</Text>
               <Text style={styles.detailValue}>{supervisorData ? supervisorData.officer_role : "Unknown"}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Aadhar:</Text>
+              <Text style={styles.detailValue}>{supervisorData ? supervisorData.officer_aadhar : "0000000000"}</Text>
             </View>
             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
               <Text style={styles.closeText}>Close</Text>
