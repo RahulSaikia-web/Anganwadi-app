@@ -16,12 +16,19 @@ async function storeGetValueFor(key) {
 }
 
 const StudentAttendance = () => {
-  const getCurrentDate = () => new Date().toISOString().split('T')[0];
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [studentsList, setStudentsList] = useState([]);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     getStudents();
@@ -36,14 +43,14 @@ const StudentAttendance = () => {
 
   const checkAttendanceDate = async () => {
     const storedDate = await AsyncStorage.getItem('attendanceDate');
-    const today = getCurrentDate();
+    const today = new Date().toLocaleDateString();
     if (storedDate !== today) {
       await AsyncStorage.setItem('attendanceDate', today);
     }
   };
 
   const getStudents = async () => {
-    setLoading(true); // Start loading
+    setLoading(true);
     let JWT_Token = await storeGetValueFor('JWT-Token');
     const apiUrl = 'https://magicminute.online/api/v1/students/';
     try {
@@ -63,7 +70,7 @@ const StudentAttendance = () => {
     } catch (error) {
       Alert.alert('Network Error', 'Please check your internet connection.');
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -124,10 +131,12 @@ const StudentAttendance = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="white" />
           <Text style={styles.backText}>Back</Text>
-          <Text style={styles.headingText}>Students Attendence</Text>
+          <Text style={styles.headingText}>Students Attendance</Text>
         </TouchableOpacity>
       </View>
-      <Text style={styles.date}>Today Date : {getCurrentDate()}</Text>
+
+      <Text style={styles.date}>Today Date : {currentDateTime.toLocaleString()}</Text>
+
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="darkred" />
@@ -147,13 +156,13 @@ const StudentAttendance = () => {
                 <Text style={styles.studentDetails}>📞 {item.student_phone}</Text>
                 <Text style={styles.studentDetails}>
                   <Text style={styles.statusLabel}>Status: </Text> 
-                  {getCurrentDate() === item.student_last_attendance ? (
+                  {new Date().toLocaleDateString() === item.student_last_attendance ? (
                     <Text style={styles.present}>Present</Text>
                   ) : (
                     <Text style={styles.absent}>Absent</Text>
                   )}
                 </Text>
-                {getCurrentDate() !== item.student_last_attendance && (
+                {new Date().toLocaleDateString() !== item.student_last_attendance && (
                   <TouchableOpacity style={styles.submitButton} onPress={() => submitAttendance(item.student_id)}>
                     <Text style={styles.buttonText}>Verify</Text>
                   </TouchableOpacity>
