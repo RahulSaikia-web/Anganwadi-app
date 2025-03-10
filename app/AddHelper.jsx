@@ -1,134 +1,320 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert, RefreshControl } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TextInput, Button, Alert, StyleSheet, Image, ScrollView, TouchableOpacity , ActivityIndicator,Modal } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
+import { useNavigation,  } from '@react-navigation/native';  // Import useNavigation
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
+import * as FileSystem from 'expo-file-system';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+
+async function storeGetValueFor(key) {
+  let result = await SecureStore.getItemAsync(key);
+  if (result) {
+    return result;
+  }
+}
 
 const AddHelper = () => {
-  const navigation = useNavigation();
-  const [helper, setHelper] = useState({ name: '', address: '', phone: '', aadhar: '', image: null });
-  const [refreshing, setRefreshing] = useState(false);
 
-  // Function to reset form
-  const resetForm = () => {
-    setHelper({ name: '', address: '', phone: '', aadhar: '', image: null });
+  const navigation = useNavigation();  // Initialize navigation hook
+  const [image, setImage] = useState();
+  const [uploadingForm , setuploadingForm] = useState(false)
+
+  const apiUrl = 'https://magicminute.online/api';
+  const [form, setForm] = useState({
+    staff_full_name: '',
+    staff_phone: '',
+    staff_aadhar: '',
+    staff_role: 'Helper',
+    staff_center_id: 99,
+    staff_image: '',
+    staff_mpin: '00000',
+  });
+
+  const handleInputChange = (name, value) => {
+    setForm({ ...form, [name]: value });
   };
 
-  // Function to pick an image from the device
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 4],
-      quality: 1,
-    });
-    if (!result.canceled) {
-      setHelper({ ...helper, image: result.assets[0].uri });
+  const loadImage = async (mode) => {
+    try {
+      let result = {};
+      if (mode == 'gallery') {
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaType: ['image'],
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: .5,
+        });
+      } else {
+        await ImagePicker.requestCameraPermissionsAsync();
+        result = await ImagePicker.launchCameraAsync({
+          allowsEditing: false,
+          aspect: [1, 1],
+          quality: .5,
+        });
+      }
+
+      if (!result.canceled) {
+        await saveImage(result.assets[0]);
+        await uploadImage(result.assets[0].uri)
+      }
+    } catch (error) {
+      alert('Error loading image: ' + error);
     }
   };
 
-  // Function to handle form submission
+  const saveImage = async (image) => {
+    try {
+      setImage(image)
+    } catch (error) {
+      throw error;
+    }
+  };
+
+
+  const uploadImage = async (uri) =>{
+    // setForm({ ...form, "student_image": ''});
+    console.log("Upload start")
+    let JWT_Token = await storeGetValueFor('JWT-Token');
+    try {
+      const response = await FileSystem.uploadAsync(apiUrl+ '/v1/images/staffs/', uri, {
+        fieldName: 'image_file',
+        httpMethod: 'POST',
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        headers : {
+          Authorization: 'Bearer ' + JWT_Token,
+          Accept: 'application/json',
+        }
+      });
+
+      if (response.status === 200)
+      {
+        console.log("response")
+        console.log(response.body)
+        setForm({ ...form, "staff_image": JSON.parse(response.body)});
+      }
+
+    } catch (error) {
+      console.log(error);
+    }
+    console.log("upload finish")
+  }
+
+
   const handleSubmit = async () => {
-    if (!helper.name || !helper.address || !helper.phone || !helper.aadhar || !helper.image) {
-      Alert.alert("All fields required", "Please fill in all details before submitting.");
+    setuploadingForm(true); // Show loading modal
+  
+    if (Object.values(form).some((value) => !value)) {
+      setuploadingForm(false);
+      Alert.alert('Error', 'All fields are required', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
       return;
     }
-
-    console.log('Helper Data:', helper);
-
-    // Placeholder fetch request (Replace with actual API endpoint)
-    /*
-    try {
-      const formData = new FormData();
-      formData.append('name', helper.name);
-      formData.append('address', helper.address);
-      formData.append('phone', helper.phone);
-      formData.append('aadhar', helper.aadhar);
-      formData.append('image', {
-        uri: helper.image,
-        name: 'helper_photo.jpg',
-        type: 'image/jpeg',
-      });
-
-      const response = await fetch('YOUR_API_ENDPOINT_HERE', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      const data = await response.json();
-      console.log('Server Response:', data);
-      Alert.alert("Success", "Helper added successfully!");
-      resetForm(); // Reset the form after successful submission
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      Alert.alert("Error", "Something went wrong. Please try again.");
+  
+    if (form.staff_full_name.length < 5) {
+      setuploadingForm(false);
+      Alert.alert('Error', 'Names must be greater than 5 char!', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
+      return;
     }
-    */
+  
+    if (form.staff_phone.length !== 10) {
+      setuploadingForm(false);
+      Alert.alert('Error', 'Invalid phone', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
+      return;
+    }
+  
+    if (form.staff_aadhar.length !== 12) {
+      setuploadingForm(false);
+      Alert.alert('Error', 'Invalid Aadhar', [{ text: "OK", onPress: () => setuploadingForm(false) }]);
+      return;
+    }
+  
+    try {
+      let JWT_Token = await storeGetValueFor('JWT-Token');
+      let config = {
+        method: 'post',
+        url: apiUrl + '/v1/staffs/',
+        headers: {
+          Authorization: 'Bearer ' + JWT_Token,
+          'Content-Type': 'application/json',
+        },
+        data: form,
+      };
+  
+      const response = await axios.request(config);
+      console.log(JSON.stringify(response.data));
+  
+      Alert.alert('Success', 'Helper added successfully!', [
+        { text: "OK", onPress: () => navigation.goBack() }
+      ]);
+  
+    } catch (error) {
+      console.log(error.response?.data || error);
+  
+      Alert.alert('Error', 'Failed to add Helper!', [
+        { text: "OK", onPress: () => setuploadingForm(false) }
+      ]);
+    }
   };
-
-  // Function to handle pull-to-refresh
-  const onRefresh = () => {
-    setRefreshing(true);
-    resetForm();
-    setRefreshing(false);
-  };
+  
 
   return (
-    <View style={styles.container}>
-      {/* Navbar with back button */}
+    <ScrollView>
+      {/* Navbar */}
       <View style={styles.navbar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="white" />
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
       </View>
+
+      <View style={styles.container}>
+
       
-      <ScrollView 
-        contentContainerStyle={styles.formContainer} 
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-        <Text style={styles.label}>Helper Name</Text>
-        <TextInput style={styles.input} placeholder="Enter Helper Name" value={helper.name} onChangeText={(text) => setHelper({ ...helper, name: text })} />
-        
-        <Text style={styles.label}>Address</Text>
-        <TextInput style={styles.input} placeholder="Enter Address" value={helper.address} onChangeText={(text) => setHelper({ ...helper, address: text })} />
-        
-        <Text style={styles.label}>Phone</Text>
-        <TextInput style={styles.input} placeholder="Enter Phone Number" keyboardType="numeric" value={helper.phone} onChangeText={(text) => setHelper({ ...helper, phone: text })} />
-        
-        <Text style={styles.label}>Aadhar</Text>
-        <TextInput style={styles.input} placeholder="Enter Aadhar Number" keyboardType="numeric" value={helper.aadhar} onChangeText={(text) => setHelper({ ...helper, aadhar: text })} />
-        
-        {/* Upload Image Button */}
-        <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
-          <Text style={styles.uploadText}>Upload Picture</Text>
-        </TouchableOpacity>
-        {helper.image && <Image source={{ uri: helper.image }} style={styles.imagePreview} />}
-        
-        {/* Submit Button */}
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitText}>Submit</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
+      <Text style={styles.label}>
+          Photo <Text style={styles.required}>*</Text>
+        </Text>
+      <View style={styles.buttonContainer}>
+          <Button title="Pick Photo" onPress={() => loadImage('gallery')} />
+          <View style={styles.buttonSpacing} />
+          <Button title="Take Photo" onPress={() => loadImage()} />
+        </View>
+        {image && <Image source={{ uri: image.uri }} style={styles.image} />}
+
+        <Text style={styles.label}>
+        </Text>
+        <Text style={styles.label}>
+          Helper Full Name <Text style={styles.required}>*</Text>
+        </Text>
+        <TextInput style={styles.input} maxLength={30} onChangeText={(value) => handleInputChange('staff_full_name', value)} />
+
+        <Text style={styles.label}>
+          Phone Number <Text style={styles.required}>*</Text>
+        </Text>
+        <TextInput style={styles.input} keyboardType="phone-pad" onChangeText={(value) => handleInputChange('staff_phone', value)} />
+
+        <Text style={styles.label}>
+          Aadhar Number <Text style={styles.required}>*</Text>
+        </Text>
+        <TextInput style={styles.input} buttonStyle={{ justifyContent: 'flex-end' }} keyboardType="phone-pad" onChangeText={(value) => handleInputChange('staff_aadhar', value)} />
+
+        <View style={styles.buttonSpacing} />
+        <Button title="Submit" onPress={handleSubmit} color="#28a745" />
+        <Modal animationType="fade" transparent={true} statusBarTranslucent={true} visible={uploadingForm}>
+            <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+            <ActivityIndicator size="large" color={'red'} />
+            <Text> Generating Face ID</Text>
+            </View>
+            </View>
+            </Modal>
+      </View>
+
+    </ScrollView>
+
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f8f8' },
-  navbar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#8B0000', padding: 15 },
+  container: {
+    padding: 20,
+    backgroundColor: '#f8f9fa',
+    flex: 1,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  required: {
+    color: 'red',
+  },
+
+ border: {
+    borderRadius:10
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ced4da',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+    backgroundColor: '#fff',
+  },
+  picker: {
+    borderWidth: 1,
+    borderColor: '#ced4da',
+    borderRadius: 5,
+    backgroundColor: '#fff',
+    marginBottom: 15,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    marginTop: 10,
+    alignSelf: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  buttonSpacing: {
+    height: 10,
+  },
+  dateInput: {
+    
+  },
+  input1: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'lightgray',
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  title: {
+    color: '#000',
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  navbar: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'darkred', padding: 15 },
   backButton: { flexDirection: 'row', alignItems: 'center' },
-  backText: { color: 'white', fontSize: 18, marginLeft: 10 },
-  formContainer: { padding: 20, alignItems: 'center' },
-  label: { fontSize: 16, fontWeight: 'bold', marginTop: 10, alignSelf: 'flex-start' },
-  input: { backgroundColor: 'white', padding: 12, borderRadius: 8, marginTop: 5, elevation: 2, width: '100%' },
-  uploadButton: { backgroundColor: 'blue', padding: 12, borderRadius: 8, alignItems: 'center', marginTop: 15, width: '100%' },
-  uploadText: { color: 'white', fontSize: 16 },
-  imagePreview: { width: 100, height: 100, borderRadius: 10, alignSelf: 'center', marginTop: 10 },
-  submitButton: { backgroundColor: 'green', padding: 15, borderRadius: 8, alignItems: 'center', marginTop: 20, width: '100%' },
-  submitText: { color: 'white', fontSize: 18, fontWeight: 'bold' },
+  backText: { color: 'white', fontSize: 18, marginLeft: 5 },
+  navTitle: { fontSize: 20, color: 'darkred', fontWeight: 'bold', marginLeft: 15 },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center", alignItems: "center", backgroundColor: '#0008'
+    },
+    
+    
+    modalView: {
+    margin: 20,
+    width: 200,
+    height: 70,
+    backgroundColor: "white",
+    borderRadius: 5,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: "#000",
+    },
+    
+    
+    shadowOffset: { 
+    width: 0,
+    height: 2,
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    },
+    modalText: {
+    marginVertical: 15,
+    textAlign: "center",
+    fontSize: 17,
+    marginLeft: 15,
+    }
 });
 
 export default AddHelper;
