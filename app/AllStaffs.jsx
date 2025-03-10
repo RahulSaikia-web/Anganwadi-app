@@ -64,6 +64,7 @@ const AllStaffs = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="white" />
           <Text style={styles.backText}>Back</Text>
+          <Text style={styles.headingText}>All Staffs</Text>
         </TouchableOpacity>
       </View>
 
@@ -148,6 +149,12 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     elevation: 3,
+  },
+  headingText:{
+    fontSize:18,
+    color:'#fafafa',
+    marginLeft:"10%",
+    fontWeight:'bold'
   },
   serialNumber: {
     fontSize: 20,

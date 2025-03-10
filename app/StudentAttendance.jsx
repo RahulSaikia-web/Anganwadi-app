@@ -124,6 +124,7 @@ const StudentAttendance = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="white" />
           <Text style={styles.backText}>Back</Text>
+          <Text style={styles.headingText}>Students Attendence</Text>
         </TouchableOpacity>
       </View>
 
@@ -185,6 +186,12 @@ const styles = StyleSheet.create({
   absent: { color: 'red', fontWeight: 'bold' },
   submitButton: { backgroundColor: '#007bff', padding: 12, borderRadius: 8, alignItems: 'center', marginTop: 5, width: 120 },
   buttonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+  headingText:{
+    fontSize:18,
+    color:'#fafafa',
+    marginLeft:"10%",
+    fontWeight:'bold'
+  },
 });
 
 export default StudentAttendance;
