@@ -16,7 +16,7 @@ async function storeGetValueFor(key) {
 }
 
 const SelfAttendance = () => {
-  const getCurrentDate = () => new Date().toISOString().split('T')[0];
+  const getCurrentDate = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
   const [staffList, setstaffList] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
   const [refreshing, setRefreshing] = useState(false);
