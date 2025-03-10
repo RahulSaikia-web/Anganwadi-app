@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, RefreshControl, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
@@ -11,51 +11,47 @@ async function storeGetValueFor(key) {
   }
 }
 
-
 const AllStudent = () => {
-  const [studensList, setStudensList] = useState([]);
+  const [studentsList, setStudentsList] = useState([]);
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-
     setTimeout(() => {
       setRefreshing(false);
-    }, 1500); 
+    }, 1500);
   }, []);
 
-    useEffect(()=>{
-      getStudents()
-    },[])
-  
-    const getStudents = async ()=>{
-      let JWT_Token = await storeGetValueFor('JWT-Token');
+  useEffect(() => {
+    getStudents();
+  }, []);
 
-         const apiUrl = 'https://magicminute.online/api/v1/students/';
-        try {
-          const response = await fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${JWT_Token}`, // Add the token here
-            },
-          });
-    
-          if (response.ok) {
-            const data = await response.json();
-            setStudensList(data['data']);
-            console.log(studensList);
-            
-          } else {
-            console.log('Failed to fetch students');
-          }
-        } catch (error) {
-          console.error('Error fetching students:', error);
-        }
+  const getStudents = async () => {
+    let JWT_Token = await storeGetValueFor('JWT-Token');
+    const apiUrl = 'https://magicminute.online/api/v1/students/';
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${JWT_Token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStudentsList(data['data']);
+      } else {
+        console.log('Failed to fetch students');
       }
-    
+    } catch (error) {
+      console.error('Error fetching students:', error);
+    }
+  };
 
-    
+  let imgUrl = 'https://magicminute.online/media/images/students/';
 
   return (
     <View style={styles.container}>
@@ -68,17 +64,29 @@ const AllStudent = () => {
       </View>
 
       <FlatList
-        data={studensList}
-        keyExtractor={(item) => item.id ? item.student_id.toString() : `${item.student_phone}`}
+        data={studentsList}
+        keyExtractor={(item) => item.student_id ? item.student_id.toString() : `${item.student_phone}`}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item, index }) => (
           <View style={styles.studentCard}>
+            {/* Serial Number (Left) */}
             <Text style={styles.serialNumber}>{index + 1}.</Text>
-            <View>
-              <Text style={styles.details}>👩‍👦 Student : {item.student_full_name}</Text>
-              <Text style={styles.details}>📞Phone : {item.student_phone}</Text>
-              <Text style={styles.details}>👩‍👦 Mother: {item.student_mother_name}</Text>
-              <Text style={styles.details}>👨‍👦 Father: {item.student_father_name}</Text>
+
+            {/* Student Info (Image & Details in One Row) */}
+            <View style={styles.studentInfo}>
+              {/* Student Image (Left of Text) */}
+              <Image
+                source={item.student_image ? { uri: `${imgUrl}${item.student_image}` } : require('@/assets/images/profile.webp')}
+                style={styles.studentImage}
+              />
+
+              {/* Student Details (Right of Image) */}
+              <View style={styles.textContainer}>
+                <Text style={styles.studentName}>{item.student_full_name}</Text>
+                <Text style={styles.details}>📞 {item.student_phone}</Text>
+                <Text style={styles.details}>👩‍👦 Mother: {item.student_mother_name}</Text>
+                <Text style={styles.details}>👨‍👦 Father: {item.student_father_name}</Text>
+              </View>
             </View>
           </View>
         )}
@@ -121,13 +129,27 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   serialNumber: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginRight: 15,
     color: '#d32f2f',
+    marginRight: 15,
+  },
+  studentInfo: {
+    flexDirection: 'row', // Aligns image & text horizontally
+    alignItems: 'center', // Keeps them centered in the row
+    flex: 1,
+  },
+  studentImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25, // Make it a perfect circle
+    marginRight: 10,
+  },
+  textContainer: {
+    flex: 1, // Makes sure text fills remaining space
   },
   studentName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
   },
