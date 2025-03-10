@@ -17,7 +17,7 @@ const WorkerHome = () => {
   const navigation = useNavigation();
   const [staffData,setstaffData] = useState()
   const [modalVisible, setModalVisible] = useState(false);
-
+  
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -55,17 +55,23 @@ const WorkerHome = () => {
           console.error('Error fetching students:', error);
         }
       }
+      let imgUrl = 'https://magicminute.online/media/images/staffs/'
+      
   return (
     <ScrollView style={styles.container}>
       {/* Profile Section */}
       <TouchableOpacity style={styles.profileSection} onPress={() => setModalVisible(true)}>
-        <Image source={require('@/assets/images/profile.webp')} style={styles.profileImage} />
-        <View>
-          <Text style={styles.userName}>{staffData ? staffData.staff_full_name : "Name"}</Text>
-          <Text style={styles.userLocation}>{staffData ? staffData.staff_phone : '0000000000'}</Text>
-        </View>
-      </TouchableOpacity>
-
+  <Image 
+    source={staffData && staffData.staff_image ? 
+      { uri: `${imgUrl}${staffData.staff_image}` } : 
+      require('@/assets/images/profile.webp')} 
+    style={styles.profileImage} 
+  />
+  <View>
+    <Text style={styles.userName}>{staffData?.staff_full_name || "Name"}</Text>
+    <Text style={styles.userLocation}>{staffData?.staff_phone || '0000000000'}</Text>
+  </View>
+</TouchableOpacity>
       {/* Quick Actions */}
       <View style={styles.quickActions}>
         <TouchableOpacity style={styles.quickActionCard}>
@@ -147,7 +153,7 @@ const OptionButton = ({ icon, text, onPress }) => (
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f8f8' },
-  profileSection: { flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: 'darkred' },
+  profileSection: { flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: 'darkred' ,},
   profileImage: { width: 50, height: 50, borderRadius: 25, marginRight: 15 },
   userName: { fontSize: 18, color: 'white', fontWeight: 'bold' },
   userLocation: { fontSize: 14, color: 'white' },

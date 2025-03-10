@@ -89,7 +89,7 @@ const WorkerLogin = () => {
           style={styles.input}
           placeholder="Enter Your PIN"
           placeholderTextColor="#888"
-          secureTextEntry
+          secureTextEntry={true}
           keyboardType="phone-pad"
           value={midOrPassword}
           onChangeText={setMidOrPassword}

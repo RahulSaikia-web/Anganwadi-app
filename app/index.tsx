@@ -10,9 +10,9 @@ const Index = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (userRole === 'officer') {
+    if (userRole === 'supervisor') {
       router.replace('/SupervisorHome');
-    } else if (userRole === 'staff') {
+    } else if (userRole === 'worker') {
       router.replace('/WorkerHome');
     }
   }, [userRole]);
