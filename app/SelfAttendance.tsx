@@ -56,7 +56,7 @@ const SelfAttendance = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setstaffList(data['data']);
+        setstaffList(data['data'].reverse());
       } else {
         Alert.alert('Error', 'Failed to fetch Staff');
       }

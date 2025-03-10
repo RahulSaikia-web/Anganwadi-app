@@ -56,7 +56,7 @@ const StudentAttendance = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setStudentsList(data['data']);
+        setStudentsList(data['data'].reverse());
       } else {
         Alert.alert('Error', 'Failed to fetch students');
       }
