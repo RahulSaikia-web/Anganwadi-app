@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const activities = [
   'Morning Assembly',
@@ -20,23 +22,61 @@ const DailyTracking = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   useEffect(() => {
+    const checkSubmissionStatus = async () => {
+      const lastSubmittedDate = await AsyncStorage.getItem('lastSubmittedDate');
+      const today = new Date().toISOString().split('T')[0];
+
+      if (lastSubmittedDate === today) {
+        setIsSubmitted(true); // Disable button if already submitted today
+      }
+    };
+    
+    checkSubmissionStatus();
+
     const interval = setInterval(() => {
       setCurrentDate(new Date());
     }, 1000);
+    
     return () => clearInterval(interval);
   }, []);
 
   const handleResponse = (activity, value) => {
-    setResponses({ ...responses, [activity]: value });
+    setResponses((prev) => ({ ...prev, [activity]: value }));
   };
 
-  const handleSubmit = () => {
+  const isAnyOptionSelected = Object.values(responses).some(value => value !== undefined);
+
+  const handleSubmit = async () => {
+    if (isSubmitting || isSubmitted) return; // Prevent multiple submissions
     setIsSubmitting(true);
-    setTimeout(() => {
+
+    const formattedResponses = activities.map((activity) => ({
+      activity,
+      response: responses[activity] || 'No',
+    }));
+
+    try {
+      const response = await axios.post('https://your-api-url.com/daily-tracking', {
+        date: currentDate.toISOString().split('T')[0],
+        activities: formattedResponses,
+      });
+
+      if (response.status === 200 && response.data.success) {
+        setIsSubmitted(true);
+        await AsyncStorage.setItem('lastSubmittedDate', currentDate.toISOString().split('T')[0]);
+
+        Alert.alert('✅ Success', 'Daily tracking submitted successfully!', [
+          { text: 'OK' }
+        ]);
+      } else {
+        throw new Error('Submission failed');
+      }
+    } catch (error) {
+      Alert.alert('❌ Error', 'Failed to submit daily tracking. Please try again.');
+      console.error(error);
+    } finally {
       setIsSubmitting(false);
-      setIsSubmitted(true);
-      Alert.alert('Success', 'Daily tracking submitted successfully!');
-    }, 2000);
+    }
   };
 
   return (
@@ -58,14 +98,16 @@ const DailyTracking = () => {
         <View key={index} style={styles.activityRow}>
           <Text style={styles.activityText}>{activity}</Text>
           <View style={styles.buttonGroup}>
-            <TouchableOpacity 
-              style={[styles.optionButton, responses[activity] === 'Yes' && styles.selectedButton]} 
-              onPress={() => handleResponse(activity, 'Yes')}>
+            <TouchableOpacity
+              style={[styles.optionButton, responses[activity] === 'Yes' && styles.selectedButton]}
+              onPress={() => handleResponse(activity, 'Yes')}
+            >
               <Text style={styles.buttonText}>Yes</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.optionButton, responses[activity] === 'No' && styles.selectedButton]} 
-              onPress={() => handleResponse(activity, 'No')}>
+            <TouchableOpacity
+              style={[styles.optionButton, responses[activity] === 'No' && styles.selectedButton]}
+              onPress={() => handleResponse(activity, 'No')}
+            >
               <Text style={styles.buttonText}>No</Text>
             </TouchableOpacity>
           </View>
@@ -74,19 +116,27 @@ const DailyTracking = () => {
 
       {/* Submit Button */}
       <TouchableOpacity
-        style={[styles.submitButton, isSubmitted && styles.disabledButton]}
+        style={[
+          styles.submitButton,
+          (!isAnyOptionSelected || isSubmitting || isSubmitted) && styles.disabledButton
+        ]}
         onPress={handleSubmit}
-        disabled={isSubmitted}>
-        <Text style={styles.submitText}>{isSubmitted ? 'Submitted' : 'Submit'}</Text>
+        disabled={!isAnyOptionSelected || isSubmitting || isSubmitted}
+      >
+        <Text style={styles.submitText}>
+          {isSubmitted ? 'Submitted' : 'Submit'}
+        </Text>
       </TouchableOpacity>
 
       {/* Loading Modal */}
-      <Modal transparent={true} animationType="fade" visible={isSubmitting}>
-        <View style={styles.modalContainer}>
-          <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.loadingText}>Submitting...</Text>
-        </View>
-      </Modal>
+      {isSubmitting && (
+        <Modal transparent={true} animationType="fade" visible={isSubmitting}>
+          <View style={styles.modalContainer}>
+            <ActivityIndicator size="large" color="#fff" />
+            <Text style={styles.loadingText}>Submitting...</Text>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 };
@@ -95,21 +145,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    padding: 10,
   },
   navbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'darkred',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "darkred",
     paddingVertical: 15,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
   },
   backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   backText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
     marginLeft: 5,
   },
@@ -128,6 +177,8 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   activityRow: {
+    marginLeft:16,
+    marginRight:16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -161,6 +212,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   submitButton: {
+    marginLeft:16,
+    marginRight:16,
     backgroundColor: 'darkred',
     paddingVertical: 12,
     marginTop: 20,
