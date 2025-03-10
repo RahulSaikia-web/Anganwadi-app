@@ -55,7 +55,7 @@ const Attendance = () => {
 
   // Filter the attendance data
   const filterAttendance = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
     const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
@@ -128,10 +128,11 @@ const Attendance = () => {
           keyExtractor={(item) => item.attendance_id.toString()}
           renderItem={({ item }) => (
             <View style={styles.attendanceItem}>
-              <Text style={styles.boldText}>Student ID: {item.attendance_student_id}</Text>
+              <Text style={styles.dateText}>Name: {item.student_full_name}</Text>
+              <Text style={styles.boldText}>Student ID: {item.student_id}</Text>
               <Text style={styles.dateText}>Date: {item.attendance_date}</Text>
-              <Text style={styles.dateText}>Mode: {item.attendance_mode}</Text>
               <Text style={styles.dateText}>Center ID: {item.attendance_center_id}</Text>
+              <Text style={styles.present}>Status: Present</Text>
             </View>
           )}
         />
@@ -184,14 +185,15 @@ const styles = StyleSheet.create({
   attendanceItem: { padding: 15, borderBottomWidth: 1, borderBottomColor: '#ddd' },
   boldText: { fontWeight: 'bold', fontSize: 16 },
   dateText: { fontSize: 16, color: '#555' },
-  present: { color: 'green' },
+   present: { color: 'green' },
   absent: { color: 'red' },
   modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
   modalContent: { backgroundColor: 'white', padding: 20, borderRadius: 10, width: 250 },
   modalItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
   radioIcon: { marginRight: 10 },
   closeButton: { marginTop: 15, backgroundColor: 'red', padding: 10, borderRadius: 5 },
-  closeButtonText: { color: 'white', textAlign: 'center' }
+  closeButtonText: { color: 'white', textAlign: 'center' },
+  present: { fontWeight: 'bold', color: 'green', fontSize: 16 }
 });
 
 export default Attendance;

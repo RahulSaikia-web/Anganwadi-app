@@ -7,7 +7,6 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 async function storeGetValueFor(key) {
@@ -20,7 +19,7 @@ const StudentAttendance = () => {
   const [studentsList, setStudentsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -74,33 +73,6 @@ const StudentAttendance = () => {
     }
   };
 
-  const verifyAttendance = async (studentId, uri) => {
-    setModalVisible(true);
-    let JWT_Token = await storeGetValueFor('JWT-Token');
-    try {
-      const response = await FileSystem.uploadAsync(
-        `https://magicminute.online/api/v1/attendance/students/${studentId}`, uri, {
-          fieldName: 'image_file',
-          httpMethod: 'POST',
-          uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-          headers: { Authorization: `Bearer ${JWT_Token}`, Accept: 'application/json' },
-        }
-      );
-      setModalVisible(false);
-      if (response.status === 200) {
-        Alert.alert('Success', 'Student Verified successfully!', [
-          { text: 'OK', onPress: () => navigation.goBack() }
-        ]);
-      } else {
-        let resData = await JSON.parse(response.body);
-        Alert.alert('Error', resData.detail);
-      }
-    } catch (error) {
-      setModalVisible(false);
-      Alert.alert('Error', 'Verification failed, please try again.');
-    }
-  };
-
   const loadImage = async () => {
     await ImagePicker.requestCameraPermissionsAsync();
     let result = await ImagePicker.launchCameraAsync({ allowsEditing: false, quality: 0.5 });
@@ -110,9 +82,52 @@ const StudentAttendance = () => {
   };
 
   const submitAttendance = async (studentId) => {
+    setIsProcessing(true); // Show modal
     let loaded_image_uri = await loadImage();
-    if (loaded_image_uri) {
-      await verifyAttendance(studentId, loaded_image_uri);
+
+    if (!loaded_image_uri) {
+      setIsProcessing(false);
+      Alert.alert('Error', 'No image selected.');
+      return;
+    }
+
+    let JWT_Token = await storeGetValueFor('JWT-Token');
+    const apiUrl = `https://magicminute.online/api/v1/verify_face/`;
+
+    let formData = new FormData();
+    formData.append('student_id', studentId);
+    formData.append('image', {
+      uri: loaded_image_uri,
+      type: 'image/jpeg',
+      name: 'photo.jpg',
+    });
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${JWT_Token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+      setIsProcessing(false); // Hide modal
+
+      if (response.ok) {
+        if (result.status === 'success') {
+          Alert.alert('Verification Successful', 'Attendance has been marked!');
+          await getStudents();
+        } else {
+          Alert.alert('Verification Failed', result.error || 'Unknown error. Please try again.');
+        }
+      } else {
+        Alert.alert('Error', result.message || 'Failed to verify face. Please try again.');
+      }
+    } catch (error) {
+      setIsProcessing(false);
+      Alert.alert('Network Error', 'Please check your internet connection.');
     }
   };
 
@@ -120,13 +135,7 @@ const StudentAttendance = () => {
 
   return (
     <View style={styles.container}>
-      <Modal transparent={true} visible={modalVisible}>
-        <View style={styles.modalContainer}>
-          <ActivityIndicator size="large" color="white" />
-          <Text style={styles.modalText}>Verifying Face ID...</Text>
-        </View>
-      </Modal>
-      
+      {/* Navigation Bar */}
       <View style={styles.navBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="white" />
@@ -137,6 +146,17 @@ const StudentAttendance = () => {
 
       <Text style={styles.date}>Today Date : {currentDateTime.toLocaleString()}</Text>
 
+      {/* Loading Modal */}
+      <Modal visible={isProcessing} transparent animationType="fade">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <ActivityIndicator size="large" color="darkred" />
+            <Text style={styles.modalText}>Processing...</Text>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Student List */}
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="darkred" />
@@ -147,35 +167,41 @@ const StudentAttendance = () => {
           data={studentsList}
           keyExtractor={(item) => item.student_id.toString()}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          renderItem={({ item, index }) => (
-            <View style={styles.studentCard}>
-              <Text style={styles.serialNumber}>{index + 1}.</Text>
-              <Image source={{ uri: `${imgUrl}${item.student_image}` }} style={styles.studentImage} />
-              <View style={styles.detailsContainer}>
-                <Text style={styles.studentName}>👩‍🎓 {item.student_full_name}</Text>
-                <Text style={styles.studentDetails}>📞 {item.student_phone}</Text>
-                <Text style={styles.studentDetails}>
-                  <Text style={styles.statusLabel}>Status: </Text> 
-                  {new Date().toLocaleDateString() === item.student_last_attendance ? (
-                    <Text style={styles.present}>Present</Text>
-                  ) : (
-                    <Text style={styles.absent}>Absent</Text>
+          renderItem={({ item, index }) => {
+            const lastAttendanceDate = new Date(item.student_last_attendance).toLocaleDateString();
+            const todayDate = new Date().toLocaleDateString();
+            const isPresent = lastAttendanceDate === todayDate;
+
+            return (
+              <View style={styles.studentCard}>
+                <Text style={styles.serialNumber}>{index + 1}.</Text>
+                <Image source={{ uri: `${imgUrl}${item.student_image}` }} style={styles.studentImage} />
+                <View style={styles.detailsContainer}>
+                  <Text style={styles.studentName}>👩‍🎓 {item.student_full_name}</Text>
+                  <Text style={styles.studentDetails}>📞 {item.student_phone}</Text>
+                  <Text style={styles.studentDetails}>
+                    <Text style={styles.statusLabel}>Status: </Text> 
+                    {isPresent ? (
+                      <Text style={styles.present}>Present</Text>
+                    ) : (
+                      <Text style={styles.absent}>Absent</Text>
+                    )}
+                  </Text>
+
+                  {!isPresent && (
+                    <TouchableOpacity style={styles.submitButton} onPress={() => submitAttendance(item.student_id)}>
+                      <Text style={styles.buttonText}>Verify</Text>
+                    </TouchableOpacity>
                   )}
-                </Text>
-                {new Date().toLocaleDateString() !== item.student_last_attendance && (
-                  <TouchableOpacity style={styles.submitButton} onPress={() => submitAttendance(item.student_id)}>
-                    <Text style={styles.buttonText}>Verify</Text>
-                  </TouchableOpacity>
-                )}
+                </View>
               </View>
-            </View>
-          )}
+            );
+          }}
         />
       )}
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
   modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.6)' },
