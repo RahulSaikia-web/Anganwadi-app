@@ -1,8 +1,9 @@
-import { View, Text, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
+import axios from 'axios';
 
 async function storeGetValueFor(key) {
   let result = await SecureStore.getItemAsync(key);
@@ -10,29 +11,14 @@ async function storeGetValueFor(key) {
     return result;
   }
 }
-const API_URL = 'https://your-api-endpoint.com/ration'; // Replace with your API endpoint
 
 const Ration = () => {
   
   const navigation = useNavigation();
+  const [rationNote, setRationNote] = useState();
   const [rationList, setRationList] = useState([{ item: '', quantity: '' }]);
   const [rationStockDataList, setRationStockDataList] = useState([]);
-
-  useEffect(() => {
-    fetchRationData();
-  }, []);
-
-  // Fetch stored ration data
-  const fetchRationData = async () => {
-    let JWT_Token = await storeGetValueFor('JWT-Token');
-    try {
-      const response = await fetch(API_URL, { method: 'GET' });
-      const data = await response.json();
-      setRationStockDataList(data.ration_entries || []);
-    } catch (error) {
-      console.error('Error fetching ration data:', error);
-    }
-  };
+  const [rationHistoryList, setRationHistoryList] = useState([])
 
   // Add new ration entry field
   const addRationField = () => {
@@ -47,7 +33,32 @@ const Ration = () => {
     }
   };
 
-  // Save ration data as a list of objects
+  useEffect(() => {
+    fetchRationData();
+  }, []);
+
+  // Fetch ration data of current center
+  const fetchRationData = async () => {
+    let JWT_Token = await storeGetValueFor('JWT-Token');
+    try {
+      const response = await fetch('https://magicminute.online/api/v1/rations/', { 
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer ' + JWT_Token,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      
+      console.log(data.data)
+      setRationHistoryList(data.data)
+      
+    } catch (error) {
+      console.error('Error fetching ration data:', error);
+    }
+  };
+
+  // Save ration data 
   const saveRationStock = async () => {
     let JWT_Token = await storeGetValueFor('JWT-Token');
     const filteredRationList = rationList.filter(
@@ -58,25 +69,42 @@ const Ration = () => {
       Alert.alert('Error', 'Please enter at least one valid ration entry.');
       return;
     }
-    console.log(filteredRationList);
-    
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ration_entries: filteredRationList }),
-      });
 
-      if (response.ok) {
-        Alert.alert('Success', 'Ration saved successfully!');
-        fetchRationData();
-        setRationList([{ item: '', quantity: '' }]); 
-      } else {
-        Alert.alert('Error', 'Failed to save ration data.');
+    try {
+
+      let rationData = {
+        "ration_note": rationNote,
+        "ration_items": filteredRationList
       }
+
+      let JWT_Token = await storeGetValueFor('JWT-Token');
+      let config = {
+        method: 'post',
+        url: 'https://magicminute.online/api/v1/rations/',
+        headers: {
+          Authorization: 'Bearer ' + JWT_Token,
+          'Content-Type': 'application/json',
+        },
+        data: rationData,
+      };
+  
+      const response = await axios.request(config);
+      if (response.status === 200)
+      {
+        Alert.alert('Success', 'Ration details added successfully', [
+          { text: "Ok", onPress: () => navigation.goBack() }
+        ]);
+      }
+      else{
+        Alert.alert('error', 'Ration details added successfully', [
+          { text: "Try again"}
+        ]);
+      }
+
     } catch (error) {
-      console.error('Error saving ration data:', error);
+      console.log(error.response?.data || error);
     }
+
   };
 
   return (
@@ -90,8 +118,12 @@ const Ration = () => {
       </View>
 
       <ScrollView style={{ padding: 20 }}>
-        {/* Ration Entry */}
+        {/* Ration detail input staring*/}
+        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Ration Note</Text>
+
+        <TextInput style={styles.input} onChangeText={(value) => setRationNote(value)} />
         <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Ration Entry</Text>
+
         {rationList.map((ration, index) => (
           <View key={index} style={{ marginBottom: 15, backgroundColor: 'white', padding: 10, borderRadius: 10, elevation: 3, flexDirection: 'row', alignItems: 'center' }}>
             <View style={{ flex: 1 }}>
@@ -137,20 +169,34 @@ const Ration = () => {
 
         {/* Ration History */}
         <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Ration History</Text>
-        <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 10, elevation: 3 }}>
-          {rationStockDataList.length > 0 ? (
-            rationStockDataList.map((ration, index) => (
-              <Text key={index} style={{ fontSize: 16, color: '#555', marginBottom: 5 }}>
-                {ration.item} - {ration.quantity}
-              </Text>
-            ))
+        {/* <View style={{ backgroundColor: 'white', padding: 15, borderRadius: 10, elevation: 3 }}> */}
+          {rationHistoryList.length > 0 ? (
+          <View>
+              {/* show ration history */}
+          </View>
           ) : (
             <Text style={{ fontSize: 16, color: '#555' }}>No Ration History Available</Text>
           )}
-        </View>
+        {/* </View> */}
       </ScrollView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ced4da',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+    backgroundColor: '#fff',
+  },
+});
 
 export default Ration;
