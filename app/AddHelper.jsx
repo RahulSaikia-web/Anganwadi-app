@@ -168,6 +168,7 @@ const AddHelper = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="white" />
           <Text style={styles.backText}>Back</Text>
+          <Text style={styles.headingText}>Add Students</Text>
         </TouchableOpacity>
       </View>
 
@@ -264,9 +265,12 @@ const styles = StyleSheet.create({
   buttonSpacing: {
     height: 10,
   },
-  dateInput: {
-    
-  },
+ headingText:{
+  fontSize:18,
+  color:'#fafafa',
+  marginLeft:"25%",
+  fontWeight:'bold'
+ },
   input1: {
     padding: 10,
     borderBottomWidth: 1,
