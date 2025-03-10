@@ -76,17 +76,28 @@ const WorkerHome = () => {
     <Text style={styles.userLocation}>{staffData?.staff_phone || '0000000000'}</Text>
   </View>
 </TouchableOpacity>
-      {/* Quick Actions */}
-      <View style={styles.quickActions}>
-        <TouchableOpacity style={styles.quickActionCard}>
+     {/* Quick Actions */}
+     <View style={styles.quickActions}>
+        <TouchableOpacity
+          style={styles.quickActionCard}
+          onPress={() => navigation.navigate("Benificiaries")}
+        >
           <FontAwesome5 name="users" size={24} color="white" />
           <Text style={styles.quickActionText}>Beneficiaries</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.quickActionCard}>
+
+        <TouchableOpacity
+          style={styles.quickActionCard}
+          onPress={() => navigation.navigate("DailyTracking")}
+        >
           <FontAwesome5 name="calendar-check" size={24} color="white" />
           <Text style={styles.quickActionText}>Daily Tracking</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.quickActionCard}>
+
+        <TouchableOpacity
+          style={styles.quickActionCard}
+          onPress={() => navigation.navigate("HomeVisit")}
+        >
           <FontAwesome5 name="home" size={24} color="white" />
           <Text style={styles.quickActionText}>Home Visits</Text>
         </TouchableOpacity>
