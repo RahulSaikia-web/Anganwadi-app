@@ -85,12 +85,15 @@ const WorkerHome = () => {
       {/* Action Center */}
       <Text style={styles.actionCenterTitle}>Action Center</Text>
       <View style={styles.actionGrid}>
-        <OptionButton icon="user-plus" text="Add Student" onPress={() => navigation.navigate('AddStudent')} />
-        <OptionButton icon="users" text="All Staffs" onPress={() => navigation.navigate('AllStaffs')} />
-        <OptionButton icon="user-plus" text="Add Helper" onPress={() => navigation.navigate('AddHelper')} />
-        <OptionButton icon="user-check" text="Staff Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
-        <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
+        
         <OptionButton icon="users" text="All Student" onPress={() => navigation.navigate('AllStudent')} />
+        <OptionButton icon="user" text="Student Attendance" onPress={() => navigation.navigate('StudentAttendance')} />
+        <OptionButton icon="user-plus" text="Add Student" onPress={() => navigation.navigate('AddStudent')} />
+        
+        <OptionButton icon="users" text="All Staffs" onPress={() => navigation.navigate('AllStaffs')} />
+        <OptionButton icon="user-check" text="Staff Attendance" onPress={() => navigation.navigate('SelfAttendance')} />
+        <OptionButton icon="user-plus" text="Add Helper" onPress={() => navigation.navigate('AddHelper')} />
+        
         <OptionButton icon="clipboard-list" text="Attendance" onPress={() => navigation.navigate('Attendance')} />
         <OptionButton icon="school" text="Center Details" onPress={() => navigation.navigate('CenterDetails')} />
         <OptionButton icon="shopping-bag" text="Ration" onPress={() => navigation.navigate('Ration')} />
